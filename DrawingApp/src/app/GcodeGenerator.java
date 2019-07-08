@@ -15,7 +15,7 @@ public class GcodeGenerator implements Runnable{
     private String nextGcodeString;
     private final int MAX_GCODE_CAPACITY;
     private int messagesAddedCount = 0;
-    private final int SLEEP_TIME = 100;
+    // private final int SLEEP_TIME = 1000;
 
     GcodeGenerator(String name,CoordinateMessageList sharedCoordsQueue, LinkedList<String> sharedGcodeQueue, int maxGcodeCapacity){
         threadName = name;
@@ -27,20 +27,29 @@ public class GcodeGenerator implements Runnable{
     }
     public void run(){
         System.out.println("Running " + threadName);
-        while(coordinatesQueue.CoordinatesAvailable()){
+        // while(coordinatesQueue.CoordinatesAvailable()){
+        while(true){
             try {
                 //do thread stuff
-                CoordinateMessage msg = coordinatesQueue.getNextCoordinates();
-                nextGcodeString = parseCoordinatesToGcode(msg);
-                addGcodeToQueue(nextGcodeString);
-                System.out.println("Threading is happening [" + threadName + "]");
+                synchronized(coordinatesQueue){
+                    if(coordinatesQueue.CoordinatesAvailable()){
+                        CoordinateMessage msg = coordinatesQueue.getNextCoordinates();
+                        nextGcodeString = parseCoordinatesToGcode(msg);
+                        addGcodeToQueue(nextGcodeString);
+                        // System.out.println("Coordinates Available");
+                        coordinatesQueue.wait();
+                    }
+                }
+                
+
+                // System.out.println("Threading is happening [" + threadName + "]");
             } catch (InterruptedException e) {
                 System.out.println("Thread interrupted.");
                 e.printStackTrace();
             }
         }
         
-        System.out.println("Exiting thread.");
+       // System.out.println("Exiting thread.");
     }
     public void start(){
         System.out.println("Starting " + threadName); 
@@ -56,17 +65,24 @@ public class GcodeGenerator implements Runnable{
                 System.out.println("GCode Queue at capacity.");
                 gCodeMessages.wait();
             }
-
-            Thread.sleep(SLEEP_TIME);
             gCodeMessages.addLast(gCodeStr);
             messagesAddedCount++;
-            System.out.println("GCode added to queue [" + 
-                 + messagesAddedCount + "]: " + gCodeStr );
+            System.out.println("Generated GCode: [" + 
+                 + messagesAddedCount + ", " + gCodeMessages.size() + "]: " + gCodeStr );
+            // Thread.sleep(SLEEP_TIME);
             gCodeMessages.notify();
         }
     }
     private String parseCoordinatesToGcode(CoordinateMessage msg){
+        int cX = msg.currentX();
+        int cY = msg.currentY();
 
-        return "";
+        StringBuilder sBuilder = new StringBuilder();
+        sBuilder.append("X");
+        sBuilder.append(cX);
+        sBuilder.append(" Y");
+        sBuilder.append(cY);
+        sBuilder.append("/n");
+        return sBuilder.toString();
     }
 }

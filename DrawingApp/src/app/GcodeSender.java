@@ -10,7 +10,7 @@ public class GcodeSender implements Runnable{
     private Thread t;
     private String threadName;
     private LinkedList<String> gCodeMessages = new LinkedList<String>();
-    private final int MESSAGE_DELAY = 100;
+    // private final int MESSAGE_DELAY = 1000;
 
     GcodeSender(String name, LinkedList<String> sharedQueue){
         threadName = name;
@@ -19,18 +19,18 @@ public class GcodeSender implements Runnable{
     }
     public void run(){
         System.out.println("Running " + threadName);
-        while(gCodeMessages.size() > 0){
+        while(true){
             try {
-                //do thread stuff
                 sendGcode();
-                System.out.println("Threading is happening [" + threadName + "]");
+                //do thread stuff
+                // System.out.println("Threading is happening [" + threadName + "]");
             } catch (Exception e) {
                 System.out.println("Thread interrupted.");
                 e.printStackTrace();
             }
         }
         
-        System.out.println("Exiting thread.");
+        // System.out.println("Exiting thread.");
     }
     public void start(){
         System.out.println("Starting " + threadName); 
@@ -48,10 +48,10 @@ public class GcodeSender implements Runnable{
                     " is waiting , size: " + gCodeMessages.size());
                 gCodeMessages.wait();
             }
-            Thread.sleep(MESSAGE_DELAY);
+            // Thread.sleep(MESSAGE_DELAY);
             String gstr = gCodeMessages.getFirst();
             gCodeMessages.removeFirst();
-            System.out.println("Sending GCode: " + gstr);
+            System.out.println("Sent GCode: " + gstr);
             gCodeMessages.notifyAll();
         }
         

@@ -10,7 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.BasicStroke;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+// import javax.swing.JLabel;
 
 import app.CoordinateMessageList;
 /**
@@ -71,9 +71,9 @@ public class DrawArea extends JComponent {
     }
 
     class CustomMouseListener implements MouseListener {
-        private JLabel statusLabel;
+        //  private JLabel statusLabel;
         public void mouseClicked(MouseEvent e) {
-           statusLabel.setText("Mouse Clicked: ("+e.getX()+", "+e.getY() +")");
+//           statusLabel.setText("Mouse Clicked: ("+e.getX()+", "+e.getY() +")");
         }
         public void mousePressed(MouseEvent e) {
             prevX = e.getX();
@@ -93,7 +93,7 @@ public class DrawArea extends JComponent {
             currY = e.getY();
             prevX = currX;
             prevY = currY;
-            addCoordinateMessage();
+            // addCoordinateMessage();
         }
     
         public void mouseDragged(MouseEvent e) {
@@ -110,7 +110,12 @@ public class DrawArea extends JComponent {
         }
      }
      public void addCoordinateMessage(){
-        CoordinateMessage msg = new CoordinateMessage(currX, currY, prevX, prevY);
-        coordsQueue.addCoordinatesToList(msg);
+         synchronized(coordsQueue){
+            CoordinateMessage msg = new CoordinateMessage(currX, currY, prevX, prevY);
+            coordsQueue.addCoordinatesToList(msg);
+            // System.out.println("Adding a message from DrawArea: [" + currX + ", " + currY + "]" );
+            coordsQueue.notify();
+         }
+        
      }
 }

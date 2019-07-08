@@ -20,7 +20,10 @@ public class App {
         CoordinateMessageList coordsQueue = new CoordinateMessageList();
         GcodeGenerator gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
         GcodeSender gcs = new GcodeSender("Sender", sharedQueue);
+        gcg.setPriority(2);
         gcg.start();
+
+        gcs.setPriority(1);
         gcs.start();
 
         SwingUtilities.invokeLater(new Runnable(){

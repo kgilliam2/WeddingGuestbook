@@ -6,7 +6,8 @@ import java.util.LinkedList;
  * GcodeGenerator
  * This will maintain a buffer of gcode messages to send in queue/enqueue fashion.
  */
-public class GcodeGenerator implements Runnable{
+// public class GcodeGenerator implements Runnable{
+public class GcodeGenerator extends Thread{
     private Thread t;
     private String threadName;
     private CoordinateMessageList coordinatesQueue;// = new CoordinateMessageList();
@@ -22,7 +23,7 @@ public class GcodeGenerator implements Runnable{
         coordinatesQueue = sharedCoordsQueue;
         gCodeMessages = sharedGcodeQueue;
         MAX_GCODE_CAPACITY = maxGcodeCapacity;
-        System.out.println("Creating " + threadName );
+        // System.out.println("Creating " + threadName );
 
     }
     public void run(){

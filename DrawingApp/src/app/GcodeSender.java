@@ -6,7 +6,8 @@ import java.util.LinkedList;
  * This will send messages over serial and let the generator know when it has done so.
  * 
  */
-public class GcodeSender implements Runnable{
+// public class GcodeSender implements Runnable{
+public class GcodeSender extends Thread{
     private Thread t;
     private String threadName;
     private LinkedList<String> gCodeMessages = new LinkedList<String>();
@@ -15,7 +16,7 @@ public class GcodeSender implements Runnable{
     GcodeSender(String name, LinkedList<String> sharedQueue){
         threadName = name;
         gCodeMessages = sharedQueue;
-        System.out.println("Creating " + threadName );
+        // System.out.println("Creating " + threadName );
     }
     public void run(){
         System.out.println("Running " + threadName);

@@ -9,6 +9,8 @@ import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
@@ -28,13 +30,23 @@ import app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = true;
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEVELOPER_MODE = false;
+    public static final boolean DEBUG_MODE = false;
+
+    DrawArea drawArea;
+    Button clearButton = new Button("Clear");
     Dimension displaySize = Toolkit.getDefaultToolkit().getScreenSize();
 
     static LinkedList<String> sharedQueue = new LinkedList<String>();
     static CoordinateMessageList coordsQueue = new CoordinateMessageList();
 
+    ActionListener actionListener = new ActionListener(){
+        public void actionPerformed(ActionEvent e){
+            if(e.getSource() == clearButton){
+                drawArea.clear();
+            }
+        }
+    };
     public static void main(String[] args) {
 
         GcodeGenerator gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
@@ -64,9 +76,9 @@ public class DrawingApp {
 
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
-        final DrawArea drawArea;
+        
         JLabel statusLabel = new JLabel();
-        Button clearButton = new Button("Clear");
+        
 
         // int density = Toolkit.getDefaultToolkit().getScreenResolution();
         displayWidth = (int) displaySize.getWidth();
@@ -84,12 +96,16 @@ public class DrawingApp {
             content.add(drawArea, BorderLayout.CENTER);
         }
         else if (DEBUG_MODE)  {
-            frame.setSize(new Dimension(displayWidth, drawHeight));
+            frame.setSize(new Dimension(displayWidth, displayHeight));
+            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
+            JPanel midPanel = new JPanel();
+            
             content.add(drawArea, BorderLayout.CENTER);
+
         }
         else {
 
-            topHeight = displayHeight - drawHeight;
+            topHeight = (displayHeight - drawHeight)/2;
             bottomHeight = topHeight;// - statusLabel.getHeight();
 
             // frame.setSize(new Dimension(displayWidth, drawHeight + topHeight +
@@ -112,8 +128,9 @@ public class DrawingApp {
             Dimension maxTopSize = new Dimension(displayWidth, topHeight);
             topPanel.setBackground(Color.BLACK);
             topPanel.add(clearButton);
-            topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
             topPanel.setMaximumSize(maxTopSize);
+            topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
+            
             // Set up bottom panel
             statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
             statusLabel.setText("Status Text");
@@ -121,11 +138,10 @@ public class DrawingApp {
             Dimension prefBottomSize = new Dimension(displayWidth, bottomHeight);
             Dimension maxBottomSize = new Dimension(displayWidth, bottomHeight);
             bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS));
-            bottomPanel.add(statusLabel);
-            bottomPanel.add(new Box.Filler(minBottomSize, prefBottomSize, maxBottomSize));
             bottomPanel.setBackground(Color.BLACK);
             bottomPanel.setMaximumSize(maxBottomSize);
-
+            bottomPanel.add(new Box.Filler(minBottomSize, prefBottomSize, maxBottomSize));
+            bottomPanel.add(statusLabel);
             // set up the drawArea background
             Dimension minDrawSize = new Dimension(drawWidth, drawHeight);
             Dimension prefDrawSize = new Dimension(drawWidth, drawWidth);
@@ -134,11 +150,10 @@ public class DrawingApp {
             JPanel midPanel = new JPanel();
 
             midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.LINE_AXIS));
-            midPanel.add(fillerBox);
             midPanel.setOpaque(true);
             // drawArea.setPreferredSize(prefDrawSize);
             midPanel.setBackground(Color.GREEN);
-
+            midPanel.add(fillerBox);
             // Add everything to frame
             content.add(topPanel, BorderLayout.PAGE_START);
             content.add(midPanel, BorderLayout.CENTER);
@@ -158,7 +173,7 @@ public class DrawingApp {
             });
             // frame.pack();
         } 
-
+        clearButton.addActionListener(actionListener);
         frame.setVisible(true);
     }
 }

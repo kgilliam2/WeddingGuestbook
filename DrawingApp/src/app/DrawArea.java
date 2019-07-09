@@ -21,11 +21,15 @@ public class DrawArea extends JComponent {
     private static final long serialVersionUID = 1L;
     private Image image;
     private Graphics2D g2d;
-    private int currX, currY, prevX, prevY;
+    private int currX, currY, prevX, prevY, newX, newY;
+    private int areaWidth, areaHeight;
     CoordinateMessageList coordsQueue;
 
-    public DrawArea(CoordinateMessageList sharedQueue) {
+    public DrawArea(CoordinateMessageList sharedQueue, int width, int height) {
         coordsQueue = sharedQueue;
+        areaWidth = width;
+        areaHeight = height;
+
         setDoubleBuffered(false);
         addMouseListener(new CustomMouseListener());
         addMouseMotionListener(new CustomMouseMotionListener());
@@ -43,7 +47,7 @@ public class DrawArea extends JComponent {
                 RenderingHints.VALUE_ANTIALIAS_ON
                 );
             //Clear drawing area
-            clear();
+            // clear();
 
         }
         g.drawImage(image, 0, 0, null);
@@ -76,12 +80,18 @@ public class DrawArea extends JComponent {
 //           statusLabel.setText("Mouse Clicked: ("+e.getX()+", "+e.getY() +")");
         }
         public void mousePressed(MouseEvent e) {
-            prevX = e.getX();
-            prevY = e.getY();
+            newX = e.getX();
+            newY = e.getY();
+            if (newX >=0 && newX <= areaWidth) prevX = newX;
+            if (newY >=0 && newY <= areaHeight) prevY = newY;
         }
         public void mouseReleased(MouseEvent e) {
         }
         public void mouseEntered(MouseEvent e) {
+            newX = e.getX();
+            newY = e.getY();
+            if (newX >=0 && newX <= areaWidth) prevX = newX;
+            if (newY >=0 && newY <= areaHeight) prevY = newY;
         }
         public void mouseExited(MouseEvent e) {
         }
@@ -89,16 +99,36 @@ public class DrawArea extends JComponent {
      class CustomMouseMotionListener implements MouseMotionListener{
 
         public void mouseMoved(MouseEvent e) {
-            currX = e.getX();
-            currY = e.getY();
-            prevX = currX;
-            prevY = currY;
+            newX = e.getX();
+            newY = e.getY();
+
+            if (newX >=0 && newX <= areaWidth) {
+                currX = newX;
+                prevX = currX;
+            }
+            if (newY >=0 && newY <= areaHeight) {
+                currY = newY;
+                prevY = currY;
+            }
+            
             // addCoordinateMessage();
         }
     
         public void mouseDragged(MouseEvent e) {
-            currX = e.getX();
-            currY = e.getY();
+            newX = e.getX();
+            newY = e.getY();
+            if (newX >=0 && newX <= areaWidth){
+                currX = newX;
+            } 
+            else{
+                currX = newX < 0 ? 0 : areaWidth;
+            }
+            if (newY >=0 && newY <= areaHeight) {
+                currY = newY;
+            }
+            else{
+                currY = newY < 0 ? 0 : areaHeight;
+            }
 
             if(g2d != null){
                 g2d.drawLine(prevX, prevY, currX, currY);
@@ -118,4 +148,5 @@ public class DrawArea extends JComponent {
          }
         
      }
+     
 }

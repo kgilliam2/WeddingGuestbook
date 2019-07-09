@@ -44,10 +44,10 @@ public class GcodeSender extends Thread{
     public void sendGcode() throws InterruptedException{
         synchronized(gCodeMessages){
             while(gCodeMessages.isEmpty()){
-                System.out.println("Queue is empty " + 
-                    Thread.currentThread().getName() + 
-                    " is waiting , size: " + gCodeMessages.size());
-                gCodeMessages.wait();
+                // System.out.println("Queue is empty " + 
+                //     Thread.currentThread().getName() + 
+                //     " is waiting , size: " + gCodeMessages.size());
+                gCodeMessages.wait(1000);
             }
             // Thread.sleep(MESSAGE_DELAY);
             String gstr = gCodeMessages.getFirst();

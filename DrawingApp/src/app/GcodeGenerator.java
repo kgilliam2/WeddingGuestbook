@@ -23,6 +23,7 @@ public class GcodeGenerator extends Thread{
         coordinatesQueue = sharedCoordsQueue;
         gCodeMessages = sharedGcodeQueue;
         MAX_GCODE_CAPACITY = maxGcodeCapacity;
+        
         // System.out.println("Creating " + threadName );
 
     }
@@ -64,7 +65,7 @@ public class GcodeGenerator extends Thread{
         synchronized (gCodeMessages){
             while(gCodeMessages.size() == MAX_GCODE_CAPACITY){
                 System.out.println("GCode Queue at capacity.");
-                gCodeMessages.wait();
+                gCodeMessages.wait(1000);
             }
             gCodeMessages.addLast(gCodeStr);
             messagesAddedCount++;
@@ -85,5 +86,9 @@ public class GcodeGenerator extends Thread{
         sBuilder.append(cY);
         sBuilder.append("/n");
         return sBuilder.toString();
+    }
+
+    public String getNextGcodeString(){
+        return nextGcodeString;
     }
 }

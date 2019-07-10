@@ -76,7 +76,7 @@ public class DrawingApp {
         // JLabel statusLabel = new JLabel();
         JPanel topPanel = new JPanel();
         JPanel bottomPanel = new JPanel();
-
+        //comment
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
 

@@ -33,7 +33,7 @@ import app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = false;
+    public static final boolean DEVELOPER_MODE = true;
 
     DrawArea drawArea;
     Button clearButton = new Button("Clear");
@@ -57,6 +57,11 @@ public class DrawingApp {
         gcg.setPriority(2);
         gcs.setPriority(1);
 
+        gcg.setMaxTravelX(800);
+        gcg.setMaxTravelY(300);
+        gcg.setDrawWidth(2736);
+        gcg.setDrawHeight(1368);
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 DrawingApp app = new DrawingApp();
@@ -87,7 +92,7 @@ public class DrawingApp {
         displayHeight = (int) displaySize.getHeight();
         drawWidth = displayWidth;
         drawHeight = displayWidth / 2;
-
+        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         content = frame.getContentPane();
         content.setLayout(new BorderLayout());

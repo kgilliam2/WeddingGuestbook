@@ -4,15 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.image.BufferedImage;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -31,7 +34,6 @@ import app.CoordinateMessageList;
 public class DrawingApp {
     // boolean flag = false;
     public static final boolean DEVELOPER_MODE = false;
-    public static final boolean DEBUG_MODE = false;
 
     DrawArea drawArea;
     Button clearButton = new Button("Clear");
@@ -40,13 +42,14 @@ public class DrawingApp {
     static LinkedList<String> sharedQueue = new LinkedList<String>();
     static CoordinateMessageList coordsQueue = new CoordinateMessageList();
 
-    ActionListener actionListener = new ActionListener(){
-        public void actionPerformed(ActionEvent e){
-            if(e.getSource() == clearButton){
+    ActionListener actionListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == clearButton) {
                 drawArea.clear();
             }
         }
     };
+
     public static void main(String[] args) {
 
         GcodeGenerator gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
@@ -76,9 +79,8 @@ public class DrawingApp {
 
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
-        
+
         JLabel statusLabel = new JLabel();
-        
 
         // int density = Toolkit.getDefaultToolkit().getScreenResolution();
         displayWidth = (int) displaySize.getWidth();
@@ -90,22 +92,20 @@ public class DrawingApp {
         content = frame.getContentPane();
         content.setLayout(new BorderLayout());
         drawArea = new DrawArea(coordsQueue, drawWidth, drawHeight);
-        
-        if (DEVELOPER_MODE && !DEBUG_MODE)  {
+        // Transparent 16 x 16 pixel cursor image.
+        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+
+        // Create a new blank cursor.
+        Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+
+        // Set the blank cursor to the JFrame.
+       
+        if (DEVELOPER_MODE) {
             frame.setSize(new Dimension(displayWidth, drawHeight));
             content.add(drawArea, BorderLayout.CENTER);
-        }
-        else if (DEBUG_MODE)  {
-            frame.setSize(new Dimension(displayWidth, displayHeight));
-            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
-            JPanel midPanel = new JPanel();
-            
-            content.add(drawArea, BorderLayout.CENTER);
+        } else {
 
-        }
-        else {
-
-            topHeight = (displayHeight - drawHeight)/2;
+            topHeight = (displayHeight - drawHeight) / 2;
             bottomHeight = topHeight;// - statusLabel.getHeight();
 
             // frame.setSize(new Dimension(displayWidth, drawHeight + topHeight +
@@ -130,7 +130,7 @@ public class DrawingApp {
             topPanel.add(clearButton);
             topPanel.setMaximumSize(maxTopSize);
             topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
-            
+
             // Set up bottom panel
             statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
             statusLabel.setText("Status Text");
@@ -172,7 +172,8 @@ public class DrawingApp {
                 }
             });
             // frame.pack();
-        } 
+        }
+        content.setCursor(blankCursor);
         clearButton.addActionListener(actionListener);
         frame.setVisible(true);
     }

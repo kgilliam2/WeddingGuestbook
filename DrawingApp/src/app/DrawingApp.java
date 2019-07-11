@@ -41,11 +41,15 @@ public class DrawingApp {
 
     static LinkedList<String> sharedQueue = new LinkedList<String>();
     static CoordinateMessageList coordsQueue = new CoordinateMessageList();
+    static SerialCommunicator serialComm = new SerialCommunicator();
 
     ActionListener actionListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == clearButton) {
                 drawArea.clear();
+            }
+            else {
+                btnConnectActionPerformed(e);
             }
         }
     };
@@ -54,14 +58,14 @@ public class DrawingApp {
 
         GcodeGenerator gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
         GcodeSender gcs = new GcodeSender("Sender", sharedQueue);
-        gcg.setPriority(2);
-        gcs.setPriority(1);
 
         gcg.setMaxTravelX(800);
         gcg.setMaxTravelY(300);
         gcg.setDrawWidth(2736);
         gcg.setDrawHeight(1368);
         
+        serialComm.initSerialCommunication();
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 DrawingApp app = new DrawingApp();
@@ -181,5 +185,16 @@ public class DrawingApp {
         content.setCursor(blankCursor);
         clearButton.addActionListener(actionListener);
         frame.setVisible(true);
+    }
+
+    private void btnConnectActionPerformed(ActionEvent e) {
+        serialComm.connect();
+        if (serialComm.isConnected() == true)
+        {
+            if (serialComm.initIOStream() == true)
+            {
+                serialComm.initListener();
+            }
+        }
     }
 }

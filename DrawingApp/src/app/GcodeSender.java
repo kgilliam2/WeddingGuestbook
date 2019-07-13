@@ -1,5 +1,6 @@
 package app;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import com.fazecast.jSerialComm.*;
 
@@ -15,7 +16,9 @@ public class GcodeSender implements Runnable {
     private LinkedList<String> gCodeMessages = new LinkedList<String>();
     // private final int MESSAGE_DELAY = 1000;
     SerialPort comPorts[];// = SerialPort.getCommPorts()[0];
-    SerialPort comPort;
+    SerialPort serialPort;
+    String portStr = "/dev/ttyUSB0";
+
     GcodeSender(String name, LinkedList<String> sharedQueue) {
         threadName = name;
         gCodeMessages = sharedQueue;
@@ -64,27 +67,73 @@ public class GcodeSender implements Runnable {
     }
 
     public void initSerialCommunication() {
-        comPorts = SerialPort.getCommPorts();
-        comPort = comPorts[0];
-        comPort.openPort();
-        comPort.addDataListener(new SerialPortDataListener() {
-            @Override
-            public int getListeningEvents() {
-                return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-            }
+        serialPort = SerialPort.getCommPort(portStr);
+        serialPort.setComPortParameters(115200, 8, 1, 0);
+        // sp.setComPortTimeouts(SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0); // block
+        // until bytes can be written
 
-            @Override
-            public void serialEvent(SerialPortEvent event) {
-                if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE){
-                    return;
-                }
-                // else if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_WRITTEN){
-                //     System.out.println("All bytes were successfully transmitted!");
-                // }
-                byte[] newData = new byte[comPort.bytesAvailable()];
-                int numRead = comPort.readBytes(newData, newData.length);
-                System.out.println("Read " + numRead + " bytes.");
+        if (serialPort.openPort()) {
+            System.out.println("Port is open :)");
+
+        } else {
+            System.out.println("Failed to open port :(");
+            return;
+        }
+
+        serialPort.addDataListener(new MessageListener());
+    }
+
+    public void query() throws IOException, InterruptedException {
+        serialPort.getOutputStream().write('?');
+        serialPort.getOutputStream().flush();
+        System.out.println("Sent ?");
+        // Thread.wait(1000);
+    }
+
+    private final class MessageListener implements SerialPortMessageListener {
+        @Override
+        public int getListeningEvents() {
+            return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+        }
+
+        @Override
+        public byte[] getMessageDelimiter() {
+            return new byte[] { (byte) 0x0D };
+        }
+
+        // { (byte)0x0B, (byte)0x65 }
+        @Override
+        public boolean delimiterIndicatesEndOfMessage() {
+            return true;
+        }
+
+        @Override
+        public void serialEvent(SerialPortEvent event) {
+            byte[] delimitedMessage = event.getReceivedData();
+
+            System.out.println("Received: " + parseMessage(delimitedMessage));
+        }
+
+        String parseMessage(byte[] msg) {
+            char c = 0;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < msg.length; ++i){
+                c = ((char) msg[i]);
+                sb.append(c);
             }
-        });
+               
+            return sb.toString();
+        }
+        // @Override
+        // public void serialEvent(SerialPortEvent event) {
+        // byte[] newData = event.getReceivedData();
+        // System.out.println("Received data of size: " + newData.length);
+        // char c = 0;
+        // for (int i = 0; i < newData.length; ++i){
+        // c = (char) newData[i];
+        // System.out.print(c);
+        // }
+        // System.out.println("\n");
+        // }
     }
 }

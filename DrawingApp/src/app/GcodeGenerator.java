@@ -15,7 +15,7 @@ public class GcodeGenerator implements Runnable{
     // private bool newCoordinatesFlag = false;
     private String nextGcodeString;
     private final int MAX_GCODE_CAPACITY;
-    private int messagesAddedCount = 0;
+    // private int messagesAddedCount = 0;
     // private final int SLEEP_TIME = 1000;
     private float mmPerPixelX, mmPerPixelY;
     private int drawHeight, drawWidth;
@@ -72,7 +72,7 @@ public class GcodeGenerator implements Runnable{
                 gCodeMessages.wait(1000);
             }
             gCodeMessages.addLast(gCodeStr);
-            messagesAddedCount++;
+            // messagesAddedCount++;
             // System.out.println("Generated GCode: [" + 
             //      + messagesAddedCount + ", " + gCodeMessages.size() + "]: " + gCodeStr );
             // Thread.sleep(SLEEP_TIME);

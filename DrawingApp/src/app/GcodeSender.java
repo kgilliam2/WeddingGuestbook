@@ -49,18 +49,22 @@ public class GcodeSender implements Runnable {
         }
     }
 
-    public void sendGcode() throws InterruptedException {
+    public void sendGcode() throws InterruptedException, IOException {
         synchronized (gCodeMessages) {
             while (gCodeMessages.isEmpty()) {
                 // System.out.println("Queue is empty " +
                 // Thread.currentThread().getName() +
+
+
                 // " is waiting , size: " + gCodeMessages.size());
                 gCodeMessages.wait(1000);
             }
             // Thread.sleep(MESSAGE_DELAY);
             String gstr = gCodeMessages.getFirst();
             gCodeMessages.removeFirst();
-            System.out.println("Sent GCode: " + gstr);
+            // serialPort.getOutputStream().write(gstr.);
+            serialPort.getOutputStream().flush();
+            System.out.println("Sent: " + gstr);
             gCodeMessages.notifyAll();
         }
 
@@ -117,11 +121,11 @@ public class GcodeSender implements Runnable {
         String parseMessage(byte[] msg) {
             char c = 0;
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < msg.length; ++i){
+            for (int i = 0; i < msg.length; ++i) {
                 c = ((char) msg[i]);
                 sb.append(c);
             }
-               
+
             return sb.toString();
         }
         // @Override

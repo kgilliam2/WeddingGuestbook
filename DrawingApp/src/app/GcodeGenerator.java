@@ -16,11 +16,11 @@ public class GcodeGenerator implements Runnable{
     private String nextGcodeString;
     private final int MAX_GCODE_CAPACITY;
     // private int messagesAddedCount = 0;
-    // private final int SLEEP_TIME = 1000;
+    private final int MESSAGE_DELAY = 5;
     private float mmPerPixelX, mmPerPixelY;
     private int drawHeight, drawWidth;
     private float maxTravelX, maxTravelY;
-    private final float FEED_RATE = 5000;
+    private final float FEED_RATE = 8000;
 
     GcodeGenerator(String name,CoordinateMessageList sharedCoordsQueue, LinkedList<String> sharedGcodeQueue, int maxGcodeCapacity){
         threadName = name;
@@ -69,7 +69,7 @@ public class GcodeGenerator implements Runnable{
         synchronized (gCodeMessages){
             while(gCodeMessages.size() == MAX_GCODE_CAPACITY){
                 System.out.println("GCode Queue at capacity.");
-                gCodeMessages.wait(1000);
+                gCodeMessages.wait(MESSAGE_DELAY);
             }
             gCodeMessages.addLast(gCodeStr);
             // messagesAddedCount++;
@@ -87,13 +87,13 @@ public class GcodeGenerator implements Runnable{
         //it's in mm
 
         sBuilder.append("$J =");
-        // sBuilder.append(" G90"); //Absolute distances
-        sBuilder.append(" G91"); //Incremental distances
+        sBuilder.append(" G90"); //Absolute distances
+        // sBuilder.append(" G91"); //Incremental distances
         sBuilder.append(" G21"); //Millimeter mode
         sBuilder.append(" X");
-        sBuilder.append(cX);
+        sBuilder.append(String.format("%.3f", cX));
         sBuilder.append(" Y");
-        sBuilder.append(cY);
+        sBuilder.append(String.format("%.3f", cY));
         sBuilder.append(" F");
         sBuilder.append(FEED_RATE);
         sBuilder.append("\n");

@@ -54,6 +54,8 @@ public class DrawingApp {
                 // btnConnectActionPerformed(e);
                 try {
                     gcs.query();
+                    // gcs.unlock();
+                    gcs.autoHome();
                 } catch (IOException | InterruptedException e1) {
                     e1.printStackTrace();
                 }

@@ -14,7 +14,8 @@ public class GcodeSender implements Runnable {
     private Thread t;
     private String threadName;
     private LinkedList<String> gCodeMessages = new LinkedList<String>();
-    // private final int MESSAGE_DELAY = 1000;
+    MessageListener messageListener = new MessageListener();
+    private final int MESSAGE_DELAY = 5;
     SerialPort comPorts[];// = SerialPort.getCommPorts()[0];
     SerialPort serialPort;
     String portStr = "/dev/ttyUSB0";
@@ -41,35 +42,6 @@ public class GcodeSender implements Runnable {
         // System.out.println("Exiting thread.");
     }
 
-    public void start() {
-        System.out.println("Starting " + threadName);
-        if (t == null) {
-            t = new Thread(this, threadName);
-            t.start();
-        }
-    }
-
-    public void sendGcode() throws InterruptedException, IOException {
-        synchronized (gCodeMessages) {
-            while (gCodeMessages.isEmpty()) {
-                // System.out.println("Queue is empty " +
-                // Thread.currentThread().getName() +
-
-
-                // " is waiting , size: " + gCodeMessages.size());
-                gCodeMessages.wait(1000);
-            }
-            // Thread.sleep(MESSAGE_DELAY);
-            String gstr = gCodeMessages.getFirst();
-            gCodeMessages.removeFirst();
-            // serialPort.getOutputStream().write(gstr.);
-            serialPort.getOutputStream().flush();
-            System.out.println("Sent: " + gstr);
-            gCodeMessages.notifyAll();
-        }
-
-    }
-
     public void initSerialCommunication() {
         serialPort = SerialPort.getCommPort(portStr);
         serialPort.setComPortParameters(115200, 8, 1, 0);
@@ -84,17 +56,66 @@ public class GcodeSender implements Runnable {
             return;
         }
 
-        serialPort.addDataListener(new MessageListener());
+        serialPort.addDataListener(messageListener);
     }
+
+    public void start() {
+        System.out.println("Starting " + threadName);
+        if (t == null) {
+            t = new Thread(this, threadName);
+            t.start();
+        }
+    }
+
+    public void sendGcode() throws InterruptedException, IOException {
+        synchronized (gCodeMessages) {
+            while (gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
+                gCodeMessages.wait(MESSAGE_DELAY);
+            }
+            // Thread.sleep(MESSAGE_DELAY);
+            String gstr = gCodeMessages.getFirst();
+            gCodeMessages.removeFirst();
+            char[] gcChar = gstr.toCharArray();
+            for(int i = 0; i < gcChar.length; ++i){
+                serialPort.getOutputStream().write(gcChar[i]);
+            }
+            serialPort.getOutputStream().write('\n');
+            serialPort.getOutputStream().flush();
+            messageListener.readyToSend(false);
+            System.out.println("Sent: " + gstr);
+            gCodeMessages.notifyAll();
+        }
+
+    }
+
+    
 
     public void query() throws IOException, InterruptedException {
         serialPort.getOutputStream().write('?');
         serialPort.getOutputStream().flush();
         System.out.println("Sent ?");
-        // Thread.wait(1000);
+        Thread.sleep(1000);
     }
 
+    public void unlock() throws IOException, InterruptedException  {
+        serialPort.getOutputStream().write('$');
+        serialPort.getOutputStream().write('X');
+        serialPort.getOutputStream().write('\n');
+        serialPort.getOutputStream().flush();
+        System.out.println("Sent: $X");
+        Thread.sleep(1000);
+    }
+
+    public void autoHome() throws IOException, InterruptedException  {
+        serialPort.getOutputStream().write('$');
+        serialPort.getOutputStream().write('H');
+        serialPort.getOutputStream().write('\n');
+        serialPort.getOutputStream().flush();
+        System.out.println("Sent: $X");
+        Thread.sleep(1000);
+    }
     private final class MessageListener implements SerialPortMessageListener {
+        private boolean readyFlag = true;
         @Override
         public int getListeningEvents() {
             return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
@@ -125,8 +146,20 @@ public class GcodeSender implements Runnable {
                 c = ((char) msg[i]);
                 sb.append(c);
             }
+            String msgStr = sb.toString();
+            if (msgStr.equals("\nok\r")){
+                readyToSend(true);
+                return "ok\n";
+            }
+                
+            return msgStr;
+        }
 
-            return sb.toString();
+        public boolean readyToSend(){
+            return readyFlag;
+        }
+        public void readyToSend(boolean rdy){
+            readyFlag = rdy;
         }
         // @Override
         // public void serialEvent(SerialPortEvent event) {
@@ -140,4 +173,6 @@ public class GcodeSender implements Runnable {
         // System.out.println("\n");
         // }
     }
+
+    
 }

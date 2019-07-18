@@ -1,4 +1,4 @@
-package app;
+package drawingapp;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -18,8 +18,8 @@ public class GcodeSender implements Runnable {
     private final int MESSAGE_DELAY = 5;
     SerialPort comPorts[];// = SerialPort.getCommPorts()[0];
     SerialPort serialPort;
-    String portStr = "/dev/ttyUSB0";
-
+//    String portStr = "/dev/ttyUSB0";
+//    String portStr = 
     GcodeSender(String name, LinkedList<String> sharedQueue) {
         threadName = name;
         gCodeMessages = sharedQueue;
@@ -43,7 +43,9 @@ public class GcodeSender implements Runnable {
     }
 
     public void initSerialCommunication() {
-        serialPort = SerialPort.getCommPort(portStr);
+    	SerialPort ports[] = SerialPort.getCommPorts();
+    	serialPort = ports[0];
+//        serialPort = SerialPort.getCommPort();
         serialPort.setComPortParameters(115200, 8, 1, 0);
         // sp.setComPortTimeouts(SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0); // block
         // until bytes can be written

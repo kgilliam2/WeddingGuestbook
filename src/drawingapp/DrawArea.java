@@ -1,4 +1,4 @@
-package app;
+package drawingapp;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -12,7 +12,7 @@ import java.awt.BasicStroke;
 import javax.swing.JComponent;
 // import javax.swing.JLabel;
 
-import app.CoordinateMessageList;
+import drawingapp.CoordinateMessageList;
 /**
  * DrawArea
  */

@@ -1,6 +1,8 @@
-package app;
+package drawingapp;
 
 import java.util.LinkedList;
+
+import javax.swing.JLabel;
 
 /**
  * GcodeGenerator
@@ -21,7 +23,8 @@ public class GcodeGenerator implements Runnable{
     private int drawHeight, drawWidth;
     private float maxTravelX, maxTravelY;
     private final float FEED_RATE = 8000;
-
+    private JLabel statusLabel;
+    
     GcodeGenerator(String name,CoordinateMessageList sharedCoordsQueue, LinkedList<String> sharedGcodeQueue, int maxGcodeCapacity){
         threadName = name;
         coordinatesQueue = sharedCoordsQueue;

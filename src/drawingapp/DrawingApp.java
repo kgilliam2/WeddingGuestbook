@@ -1,4 +1,4 @@
-package app;
+package drawingapp;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -26,7 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.util.LinkedList;
-import app.CoordinateMessageList;
+import drawingapp.CoordinateMessageList;
 
 /**
  * app
@@ -34,7 +34,7 @@ import app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = true;
+    public static final boolean DEVELOPER_MODE = false;
     public static GcodeGenerator gcg;
     public static GcodeSender gcs;
 

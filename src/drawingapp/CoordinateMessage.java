@@ -1,7 +1,7 @@
 /**
  * CoordinateMessage
  */
-package app;
+package drawingapp;
 
 public class CoordinateMessage {
 

@@ -1,4 +1,4 @@
-package app;
+package drawingapp;
 
 import java.util.LinkedList;
 

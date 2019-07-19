@@ -15,10 +15,15 @@ public class GcodeGenerator implements Runnable{
     private CoordinateMessageList coordinatesQueue;// = new CoordinateMessageList();
     private LinkedList<String> gCodeMessages;// = new LinkedList<String>();
     private String nextGcodeString;
-    private final int MAX_GCODE_CAPACITY;
-    private final int MESSAGE_DELAY = 10;
-    private float mmPerPixelX, mmPerPixelY;
-    private float maxTravelX, maxTravelY;
+    private static int MAX_GCODE_CAPACITY;
+    private static final int MESSAGE_DELAY = 10;
+//    public static float yMinBuff;
+//    public static float yMaxBuff;
+//    public static float xMinBuff;
+//    public static float xMaxBuff;
+//    private float mmPerPixelX, mmPerPixelY;
+//    private float maxTravelX, maxTravelY;
+    private pixelToPaperTransform TX;
     private final float FEED_RATE = 10000;
     private JLabel posLabel;
     
@@ -28,10 +33,13 @@ public class GcodeGenerator implements Runnable{
         coordinatesQueue = sharedCoordsQueue;
         gCodeMessages = sharedGcodeQueue;
         MAX_GCODE_CAPACITY = maxGcodeCapacity;
-        
+        TX = new pixelToPaperTransform();
         // System.out.println("Creating " + threadName );
 
     }
+	public pixelToPaperTransform coordinateSystem() {
+		return this.TX;
+	}
     public void run(){
         System.out.println("Running " + threadName);
         // while(coordinatesQueue.CoordinatesAvailable()){
@@ -81,9 +89,9 @@ public class GcodeGenerator implements Runnable{
         }
     }
     private String parseCoordinatesToGcode(CoordinateMessage msg){
-        float cX = (float) msg.currentX() * mmPerPixelX;
-        float cY = (float) msg.currentY() * mmPerPixelY;
-        cY = maxTravelY - cY;
+        float cX = TX.transformXCoordinate(msg.currentX());
+        float cY = TX.transformYCoordinate(msg.currentY());
+        
         float cZ = msg.isPenDown() ? -1 : 1;
         
         posLabel.setText("X: " + msg.currentX() + "Y: " + msg.currentY());
@@ -110,59 +118,46 @@ public class GcodeGenerator implements Runnable{
     public String getNextGcodeString(){
         return nextGcodeString;
     }
-
-//    public int getDrawHeight() {
-//        return drawHeight;
-//    }
-
-//    public void setDrawHeight(int displayHeight) {
-//        this.drawHeight = displayHeight;
-//        updateMmPerPixel();
-//    }
-
-//    public int getDrawWidth() {
-//        return drawWidth;
-//    }
-//
-//    public void setDrawWidth(int displayWidth) {
-//        this.drawWidth = displayWidth;
-//        updateMmPerPixel();
-//    }
-
-    public float getMaxTravelX() {
-        return maxTravelX;
-    }
-
-    public void setMaxTravelX(float maxTravelX) {
-        this.maxTravelX = maxTravelX;
-//        updateMmPerPixel();
-    }
-
-    public float getMaxTravelY() {
-        return maxTravelY;
-    }
-
-    public void setMaxTravelY(float maxTravelY) {
-        this.maxTravelY = maxTravelY;
-//        updateMmPerPixel();
-    }
-//    private void updateMmPerPixel(){
-//        mmPerPixelX = maxTravelX/drawWidth;
-//        mmPerPixelY = maxTravelY/drawHeight;
-//
-//    }
-    public void setMmPerPixel(float mmpp) {
-    	mmPerPixelX = mmpp;
-    	mmPerPixelY = mmpp;
-    }
-    public void setMmPerPixel(float mmppX, float mmppY) {
-    	mmPerPixelX = mmppX;
-    	mmPerPixelY = mmppY;
-    }
+    
 	public JLabel getPosLabel() {
 		return posLabel;
 	}
 	public void setPosLabel(JLabel posLabel) {
 		this.posLabel = posLabel;
 	}
+	
+
+    public static class pixelToPaperTransform {
+    	private static float xMinPaper, xMaxPaper, yMinPaper, yMaxPaper;
+    	private static float numPixelsX, numPixelsY;
+//    	private float mmPerPixelX, mmPerPixelY;
+    	
+    	public void setPaperLimits(float xMin, float xMax, float yMin, float yMax) {
+    		pixelToPaperTransform.xMinPaper = xMin;
+    		pixelToPaperTransform.xMaxPaper = xMax;
+    		pixelToPaperTransform.yMinPaper = yMin;
+    		pixelToPaperTransform.yMaxPaper = yMax;
+    	}
+    	public void setPixelLimits(float numPixelsX, float numPixelsY) {
+    		pixelToPaperTransform.numPixelsX = numPixelsX;
+    		pixelToPaperTransform.numPixelsY = numPixelsY;
+    	}
+    	public float mmPerPixelX() {
+    		float maxPaperTravel = xMaxPaper - xMinPaper;
+    		return maxPaperTravel/numPixelsX;
+    	}
+    	public float mmPerPixelY() {
+    		float maxPaperTravel = yMaxPaper - yMinPaper;
+    		return maxPaperTravel/numPixelsY;
+    	}
+    	public float transformXCoordinate(float xPixelCoordinate) {
+    		float xPaperCoordinate = mmPerPixelX()*xPixelCoordinate + xMinPaper;
+    		return xPaperCoordinate;
+    	}
+    	public float transformYCoordinate(float yPixelCoordinate) {
+    		float yPaperCoordinate  = mmPerPixelY()*yPixelCoordinate + yMinPaper;
+    		return yPaperCoordinate;
+    	}
+    }
+
 }

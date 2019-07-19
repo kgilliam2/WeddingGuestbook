@@ -1,0 +1,70 @@
+
+[12:39:53] [ $$ ] $0=10 ;Step pulse time, microseconds
+
+[12:39:53] [ $$ ] $1=255 ;Step idle delay, milliseconds
+
+[12:39:53] [ $$ ] $2=0 ;Step pulse invert, mask
+
+[12:39:53] [ $$ ] $3=2 ;Step direction invert, mask
+
+[12:39:53] [ $$ ] $4=1 ;Invert step enable pin, boolean
+
+[12:39:53] [ $$ ] $5=0 ;Invert limit pins, boolean
+
+[12:39:53] [ $$ ] $6=0 ;Invert probe pin, boolean
+
+[12:39:53] [ $$ ] $10=1 ;Status report options, mask
+
+[12:39:53] [ $$ ] $11=0.050 ;Junction deviation, millimeters
+
+[12:39:53] [ $$ ] $12=0.002 ;Arc tolerance, millimeters
+
+[12:39:53] [ $$ ] $13=0 ;Report in inches, boolean
+
+[12:39:53] [ $$ ] $20=1 ;Soft limits enable, boolean
+
+[12:39:53] [ $$ ] $21=1 ;Hard limits enable, boolean
+
+[12:39:53] [ $$ ] $22=1 ;Homing cycle enable, boolean
+
+[12:39:53] [ $$ ] $23=3 ;Homing direction invert, mask
+
+[12:39:53] [ $$ ] $24=300.000 ;Homing locate feed rate, mm/min
+
+[12:39:53] [ $$ ] $25=5000.000 ;Homing search seek rate, mm/min
+
+[12:39:53] [ $$ ] $26=30 ;Homing switch debounce delay, milliseconds
+
+[12:39:53] [ $$ ] $27=5.000 ;Homing switch pull-off distance, millimeters
+
+[12:39:53] [ $$ ] $30=1000 ;Maximum spindle speed, RPM
+
+[12:39:53] [ $$ ] $31=0 ;Minimum spindle speed, RPM
+
+[12:39:53] [ $$ ] $32=0 ;Laser-mode enable, boolean
+
+[12:39:53] [ $$ ] $100=57.143 ;X-axis steps per millimeter
+
+[12:39:53] [ $$ ] $101=57.143 ;Y-axis steps per millimeter
+
+[12:39:53] [ $$ ] $102=1.000 ;Z-axis steps per millimeter
+
+[12:39:53] [ $$ ] $110=12000.000 ;X-axis maximum rate, mm/min
+
+[12:39:53] [ $$ ] $111=12000.000 ;Y-axis maximum rate, mm/min
+
+[12:39:53] [ $$ ] $112=12000.000 ;Z-axis maximum rate, mm/min
+
+[12:39:53] [ $$ ] $120=1000.000 ;X-axis acceleration, mm/sec^2
+
+[12:39:53] [ $$ ] $121=1000.000 ;Y-axis acceleration, mm/sec^2
+
+[12:39:53] [ $$ ] $122=800.000 ;Z-axis acceleration, mm/sec^2
+
+[12:39:53] [ $$ ] $130=800.000 ;X-axis maximum travel, millimeters
+
+[12:39:53] [ $$ ] $131=340.000 ;Y-axis maximum travel, millimeters
+
+[12:39:53] [ $$ ] $132=70.000 ;Z-axis maximum travel, millimeters
+
+[12:39:53] [ $$ ] ok

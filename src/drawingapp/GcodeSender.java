@@ -22,6 +22,7 @@ public class GcodeSender implements Runnable {
     // = SerialPort.getCommPorts()[0];
     private SerialPort serialPort;
     private JLabel statusLabel;
+    private long lastCommandTime = 0;
     
 public JLabel getStatusLabel() {
 		return statusLabel;
@@ -91,16 +92,18 @@ public JLabel getStatusLabel() {
             }
             // Thread.sleep(MESSAGE_DELAY);
             String gstr = gCodeMessages.getFirst();
+            writeToSerial(gstr);
             gCodeMessages.removeFirst();
-            char[] gcChar = gstr.toCharArray();
-            for(int i = 0; i < gcChar.length; ++i){
-                serialPort.getOutputStream().write(gcChar[i]);
-            }
-            serialPort.getOutputStream().write('\n');
-            serialPort.getOutputStream().flush();
-            messageListener.readyToSend(false);
-            System.out.println("Sent: " + gstr);
-            statusLabel.setText(gstr);
+            
+//            char[] gcChar = gstr.toCharArray();
+//            for(int i = 0; i < gcChar.length; ++i){
+//                serialPort.getOutputStream().write(gcChar[i]);
+//            }
+//            serialPort.getOutputStream().write('\n');
+//            serialPort.getOutputStream().flush();
+            
+//            System.out.println("Sent: " + gstr);
+//            statusLabel.setText(gstr);
             gCodeMessages.notifyAll();
         }
 
@@ -133,6 +136,8 @@ public JLabel getStatusLabel() {
         serialPort.getOutputStream().flush();
         System.out.println("Sent: " + str);
         statusLabel.setText(str);
+        messageListener.readyToSend(false);
+        lastCommandTime = System.currentTimeMillis();
     }
     
     private final class MessageListener implements SerialPortMessageListener {
@@ -184,5 +189,5 @@ public JLabel getStatusLabel() {
         }
     }
 
-    
+
 }

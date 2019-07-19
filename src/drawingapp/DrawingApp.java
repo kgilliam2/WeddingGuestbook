@@ -35,6 +35,10 @@ import drawingapp.CoordinateMessageList;
 public class DrawingApp {
     // boolean flag = false;
     public static final boolean DEVELOPER_MODE = true;
+    public static final float Y_MIN_BUFFER_MM = 10;
+    public static final float Y_MAX_BUFFER_MM = 10;
+    public static final float X_MIN_BUFFER_MM = 5;
+    public static final float X_MAX_BUFFER_MM = 5;
     public static final float MAX_TRAVEL_X = 800;
     public static final float MAX_TRAVEL_Y = 340;
     public static GcodeGenerator gcg;
@@ -123,16 +127,23 @@ public class DrawingApp {
         
         displayWidth = (int) displaySize.getWidth();
         displayHeight = (int) displaySize.getHeight();
+//        float xTotalTravel = MAX_TRAVEL_X - X_MIN_BUFFER_MM - X_MAX_BUFFER_MM;
+//        float yTotalTravel = MAX_TRAVEL_Y - Y_MIN_BUFFER_MM - Y_MAX_BUFFER_MM;
         float heightWidthRatio = MAX_TRAVEL_Y/MAX_TRAVEL_X;
         drawWidth = displayWidth;
         drawHeight = (int)(displayWidth * heightWidthRatio);
-        float mmPerPixelX = MAX_TRAVEL_X/drawWidth;
-        float mmPerPixelY = MAX_TRAVEL_Y / drawHeight;
-        float mmPerPixel = mmPerPixelX < mmPerPixelY ? mmPerPixelX : mmPerPixelY;
+//        float mmPerPixelX = xTotalTravel / drawWidth;
+//        float mmPerPixelY = yTotalTravel / drawHeight;
+//        float mmPerPixel = mmPerPixelX < mmPerPixelY ? mmPerPixelX : mmPerPixelY;
         
-        gcg.setMmPerPixel(mmPerPixel);
-        gcg.setMaxTravelX(MAX_TRAVEL_X);
-        gcg.setMaxTravelY(MAX_TRAVEL_Y);
+//        gcg.setMmPerPixel(mmPerPixel);
+//        gcg.setMaxTravelX(xTotalTravel);
+//        gcg.setMaxTravelY(yTotalTravel);
+        
+        gcg.coordinateSystem().setPixelLimits(drawWidth, drawHeight);
+        gcg.coordinateSystem().setPaperLimits(
+        		X_MIN_BUFFER_MM, MAX_TRAVEL_X - X_MAX_BUFFER_MM, 
+        		MAX_TRAVEL_Y - Y_MAX_BUFFER_MM, Y_MIN_BUFFER_MM );
         
         
         topHeight = (displayHeight - drawHeight) / 2;
@@ -194,7 +205,7 @@ public class DrawingApp {
             bottomPanel.add(statusLabel, BorderLayout.LINE_START);
         } else {
         	
-        	frame.setUndecorated(true);
+//        	frame.setUndecorated(true);
         	// Transparent 16 x 16 pixel cursor image.
             BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
             // Create a new blank cursor.
@@ -214,7 +225,7 @@ public class DrawingApp {
 //                }
 //            });
         }
-        
+        frame.setUndecorated(true);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setState(JFrame.MAXIMIZED_BOTH);
         device.setFullScreenWindow(frame);

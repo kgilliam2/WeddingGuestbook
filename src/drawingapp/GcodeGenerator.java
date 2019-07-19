@@ -14,10 +14,8 @@ public class GcodeGenerator implements Runnable{
     private String threadName;
     private CoordinateMessageList coordinatesQueue;// = new CoordinateMessageList();
     private LinkedList<String> gCodeMessages;// = new LinkedList<String>();
-    // private bool newCoordinatesFlag = false;
     private String nextGcodeString;
     private final int MAX_GCODE_CAPACITY;
-    // private int messagesAddedCount = 0;
     private final int MESSAGE_DELAY = 10;
     private float mmPerPixelX, mmPerPixelY;
     private float maxTravelX, maxTravelY;
@@ -86,6 +84,7 @@ public class GcodeGenerator implements Runnable{
         float cX = (float) msg.currentX() * mmPerPixelX;
         float cY = (float) msg.currentY() * mmPerPixelY;
         cY = maxTravelY - cY;
+        float cZ = msg.isPenDown() ? -1 : 1;
         
         posLabel.setText("X: " + msg.currentX() + "Y: " + msg.currentY());
         StringBuilder sBuilder = new StringBuilder();
@@ -99,6 +98,8 @@ public class GcodeGenerator implements Runnable{
         sBuilder.append(String.format("%.3f", cX));
         sBuilder.append(" Y");
         sBuilder.append(String.format("%.3f", cY));
+        sBuilder.append(" Z");
+        sBuilder.append(String.format("%.3f", cZ));
         sBuilder.append(" F");
         sBuilder.append(FEED_RATE);
         sBuilder.append("\n");

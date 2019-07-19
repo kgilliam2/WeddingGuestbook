@@ -34,7 +34,7 @@ import drawingapp.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = false;
+    public static final boolean DEVELOPER_MODE = true;
     public static final float MAX_TRAVEL_X = 800;
     public static final float MAX_TRAVEL_Y = 340;
     public static GcodeGenerator gcg;

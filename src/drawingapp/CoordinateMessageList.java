@@ -10,10 +10,11 @@ public class CoordinateMessageList {
 
     private LinkedList<CoordinateMessage> coordsList = new LinkedList<CoordinateMessage>();
 
-    public void addCoordinatesToList(int X, int Y){
-        int pX = coordsList.getLast().currentX();
-        int pY = coordsList.getLast().currentY();
-        CoordinateMessage cmsg = new CoordinateMessage(X, Y, pX, pY);
+    public void addCoordinatesToList(int X, int Y, boolean penDown){
+        int prevX = coordsList.getLast().currentX();
+        int prevY = coordsList.getLast().currentY();
+        boolean prevPenDown = coordsList.getLast().isPenDown();
+        CoordinateMessage cmsg = new CoordinateMessage(X, Y, prevX, prevY, prevPenDown);
         coordsList.addLast(cmsg);
     }
 //    public void addCoordinatesToList(CoordinateMessage msg){

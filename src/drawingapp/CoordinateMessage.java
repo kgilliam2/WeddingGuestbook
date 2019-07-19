@@ -6,12 +6,14 @@ package drawingapp;
 public class CoordinateMessage {
 
     private int currX, currY, prevX, prevY;
+    private boolean penDown;
 
-    CoordinateMessage(int cX, int cY, int pX, int pY){
+    CoordinateMessage(int cX, int cY, int pX, int pY, boolean penDown){
         currX = cX;
         currY = cY;
         prevX = pX;
         prevY = pY;
+        setPenDown(penDown);
     }
     public int currentX(){
         return currX;
@@ -31,4 +33,10 @@ public class CoordinateMessage {
     public int deltaY(){
         return currY - prevY;
     }
+	public boolean isPenDown() {
+		return penDown;
+	}
+	public void setPenDown(boolean penDown) {
+		this.penDown = penDown;
+	}
 }

@@ -18,12 +18,12 @@ public class GcodeGenerator implements Runnable{
     private String nextGcodeString;
     private final int MAX_GCODE_CAPACITY;
     // private int messagesAddedCount = 0;
-    private final int MESSAGE_DELAY = 5;
+    private final int MESSAGE_DELAY = 10;
     private float mmPerPixelX, mmPerPixelY;
-    private int drawHeight, drawWidth;
     private float maxTravelX, maxTravelY;
-    private final float FEED_RATE = 8000;
-    private JLabel statusLabel;
+    private final float FEED_RATE = 10000;
+    private JLabel posLabel;
+    
     
     GcodeGenerator(String name,CoordinateMessageList sharedCoordsQueue, LinkedList<String> sharedGcodeQueue, int maxGcodeCapacity){
         threadName = name;
@@ -85,7 +85,9 @@ public class GcodeGenerator implements Runnable{
     private String parseCoordinatesToGcode(CoordinateMessage msg){
         float cX = (float) msg.currentX() * mmPerPixelX;
         float cY = (float) msg.currentY() * mmPerPixelY;
-
+        cY = maxTravelY - cY;
+        
+        posLabel.setText("X: " + msg.currentX() + "Y: " + msg.currentY());
         StringBuilder sBuilder = new StringBuilder();
         //it's in mm
 
@@ -100,6 +102,7 @@ public class GcodeGenerator implements Runnable{
         sBuilder.append(" F");
         sBuilder.append(FEED_RATE);
         sBuilder.append("\n");
+        
         return sBuilder.toString();
     }
 
@@ -107,23 +110,23 @@ public class GcodeGenerator implements Runnable{
         return nextGcodeString;
     }
 
-    public int getDrawHeight() {
-        return drawHeight;
-    }
+//    public int getDrawHeight() {
+//        return drawHeight;
+//    }
 
-    public void setDrawHeight(int displayHeight) {
-        this.drawHeight = displayHeight;
-        updateMmPerPixel();
-    }
+//    public void setDrawHeight(int displayHeight) {
+//        this.drawHeight = displayHeight;
+//        updateMmPerPixel();
+//    }
 
-    public int getDrawWidth() {
-        return drawWidth;
-    }
-
-    public void setDrawWidth(int displayWidth) {
-        this.drawWidth = displayWidth;
-        updateMmPerPixel();
-    }
+//    public int getDrawWidth() {
+//        return drawWidth;
+//    }
+//
+//    public void setDrawWidth(int displayWidth) {
+//        this.drawWidth = displayWidth;
+//        updateMmPerPixel();
+//    }
 
     public float getMaxTravelX() {
         return maxTravelX;
@@ -131,7 +134,7 @@ public class GcodeGenerator implements Runnable{
 
     public void setMaxTravelX(float maxTravelX) {
         this.maxTravelX = maxTravelX;
-        updateMmPerPixel();
+//        updateMmPerPixel();
     }
 
     public float getMaxTravelY() {
@@ -140,11 +143,25 @@ public class GcodeGenerator implements Runnable{
 
     public void setMaxTravelY(float maxTravelY) {
         this.maxTravelY = maxTravelY;
-        updateMmPerPixel();
+//        updateMmPerPixel();
     }
-    private void updateMmPerPixel(){
-        mmPerPixelX = maxTravelX/drawWidth;
-        mmPerPixelY = maxTravelY/drawHeight;
-
+//    private void updateMmPerPixel(){
+//        mmPerPixelX = maxTravelX/drawWidth;
+//        mmPerPixelY = maxTravelY/drawHeight;
+//
+//    }
+    public void setMmPerPixel(float mmpp) {
+    	mmPerPixelX = mmpp;
+    	mmPerPixelY = mmpp;
     }
+    public void setMmPerPixel(float mmppX, float mmppY) {
+    	mmPerPixelX = mmppX;
+    	mmPerPixelY = mmppY;
+    }
+	public JLabel getPosLabel() {
+		return posLabel;
+	}
+	public void setPosLabel(JLabel posLabel) {
+		this.posLabel = posLabel;
+	}
 }

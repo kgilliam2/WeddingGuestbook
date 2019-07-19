@@ -38,14 +38,18 @@ public class DrawArea extends JComponent {
     protected void paintComponent(Graphics g){
         if (image == null){
             //Create image
-            image = createImage(getSize().width, getSize().height);
+            image = createImage(areaWidth, areaHeight);
             g2d = (Graphics2D) image.getGraphics();
             g2d.setStroke(new BasicStroke(3));
             //Enable antialiasing
             g2d.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-                );
+            		RenderingHints.KEY_ANTIALIASING,
+            		RenderingHints.VALUE_ANTIALIAS_ON
+            		);
+//            g2d.setRenderingHint(
+//            		RenderingHints.KEY_INTERPOLATION,
+//            		RenderingHints.VALUE_INTERPOLATION_BILINEAR
+//            		);
             //Clear drawing area
             clear();
 
@@ -57,7 +61,7 @@ public class DrawArea extends JComponent {
         g2d.setPaint(Color.white);
         //Draw a white rectangle which fills entire area
         g2d.fillRect(0, 0, getSize().width, getSize().height);
-        g2d.setPaint(Color.black);
+        g2d.setPaint(Color.green);
         repaint();
     }
 
@@ -88,10 +92,10 @@ public class DrawArea extends JComponent {
         public void mouseReleased(MouseEvent e) {
         }
         public void mouseEntered(MouseEvent e) {
-            newX = e.getX();
-            newY = e.getY();
-            if (newX >=0 && newX <= areaWidth) prevX = newX;
-            if (newY >=0 && newY <= areaHeight) prevY = newY;
+//            newX = e.getX();
+//            newY = e.getY();
+//            if (newX >=0 && newX <= areaWidth) prevX = newX;
+//            if (newY >=0 && newY <= areaHeight) prevY = newY;
         }
         public void mouseExited(MouseEvent e) {
         }
@@ -129,14 +133,15 @@ public class DrawArea extends JComponent {
             else{
                 currY = newY < 0 ? 0 : areaHeight;
             }
-
+            
+            addCoordinateMessage();
             if(g2d != null){
                 g2d.drawLine(prevX, prevY, currX, currY);
                 repaint();
                 prevX = currX;
                 prevY = currY;
             }
-            addCoordinateMessage();
+            
         }
      }
      public void addCoordinateMessage(){

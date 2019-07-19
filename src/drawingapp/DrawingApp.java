@@ -35,6 +35,8 @@ import drawingapp.CoordinateMessageList;
 public class DrawingApp {
     // boolean flag = false;
     public static final boolean DEVELOPER_MODE = false;
+    public static final float MAX_TRAVEL_X = 800;
+    public static final float MAX_TRAVEL_Y = 340;
     public static GcodeGenerator gcg;
     public static GcodeSender gcs;
 
@@ -68,13 +70,10 @@ public class DrawingApp {
         gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
         gcs = new GcodeSender("Sender", sharedQueue);
 
-        gcg.setMaxTravelX(800);
-        gcg.setMaxTravelY(300);
-        gcg.setDrawWidth(2736);
-        gcg.setDrawHeight(1368);
+        
 
         gcs.initSerialCommunication();
-
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 DrawingApp app = new DrawingApp();
@@ -84,7 +83,19 @@ public class DrawingApp {
         });
         gcg.start();
         gcs.start();
-
+        
+        if( !DEVELOPER_MODE) {
+        	try {
+				Thread.sleep(3000);
+				gcs.autoHome();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
     }
 
     private void setupGUI() {
@@ -99,106 +110,132 @@ public class DrawingApp {
         Container content;
 
         JLabel statusLabel = new JLabel();
-
+        JLabel posLabel = new JLabel();
+        
+        gcs.setStatusLabel(statusLabel);
+        gcg.setPosLabel(posLabel);
+        
+        statusLabel.setFont(new Font("Courier", Font.PLAIN, 20));
+        statusLabel.setForeground(Color.white);
         // int density = Toolkit.getDefaultToolkit().getScreenResolution();
+        
+        
+        
         displayWidth = (int) displaySize.getWidth();
         displayHeight = (int) displaySize.getHeight();
+        float heightWidthRatio = MAX_TRAVEL_Y/MAX_TRAVEL_X;
         drawWidth = displayWidth;
-        drawHeight = displayWidth / 2;
+        drawHeight = (int)(displayWidth * heightWidthRatio);
+        float mmPerPixelX = MAX_TRAVEL_X/drawWidth;
+        float mmPerPixelY = MAX_TRAVEL_Y / drawHeight;
+        float mmPerPixel = mmPerPixelX < mmPerPixelY ? mmPerPixelX : mmPerPixelY;
+        
+        gcg.setMmPerPixel(mmPerPixel);
+        gcg.setMaxTravelX(MAX_TRAVEL_X);
+        gcg.setMaxTravelY(MAX_TRAVEL_Y);
+        
+        
+        topHeight = (displayHeight - drawHeight) / 2;
+        bottomHeight = displayHeight - drawHeight - topHeight; //topHeight;// - statusLabel.getHeight();
 
+        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         content = frame.getContentPane();
         content.setLayout(new BorderLayout());
         drawArea = new DrawArea(coordsQueue, drawWidth, drawHeight);
-        // Transparent 16 x 16 pixel cursor image.
-        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-
-        // Create a new blank cursor.
-        Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
-
-        // Set the blank cursor to the JFrame.
-
-        if (DEVELOPER_MODE) {
-            frame.setSize(new Dimension(displayWidth, drawHeight));
-            content.add(drawArea, BorderLayout.CENTER);
-        } else {
-            frame.setUndecorated(true);
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            frame.setState(JFrame.MAXIMIZED_BOTH);
-            device.setFullScreenWindow(frame);
-
-            content.setCursor(blankCursor);
-            
-        }
-
-        topHeight = (displayHeight - drawHeight) / 2;
-        bottomHeight = topHeight;// - statusLabel.getHeight();
-
-        // frame.setSize(new Dimension(displayWidth, drawHeight + topHeight +
-        // bottomHeight));
-
-        // frame.setPreferredSize(frame.getGraphicsConfiguration().getBounds().getSize());
-        frame.setResizable(true);
-        // frame.setAlwaysOnTop(true);
-        // frame.pack();
-
-        // drawArea.setSize(new Dimension(drawWidth, drawHeight));
-
-        // Set up the top panel
+        
+        
+     // Set up the top panel
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
         Dimension minTopSize = new Dimension(0, 0);
         Dimension prefTopSize = new Dimension(displayWidth, topHeight);
         Dimension maxTopSize = new Dimension(displayWidth, topHeight);
         topPanel.setBackground(Color.BLACK);
-        topPanel.add(clearButton);
-        topPanel.add(qButton);
         topPanel.setMaximumSize(maxTopSize);
         topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
 
         // Set up bottom panel
-        statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
-        statusLabel.setText("Status Text");
+        
         Dimension minBottomSize = new Dimension(0, 0);
         Dimension prefBottomSize = new Dimension(displayWidth, bottomHeight);
         Dimension maxBottomSize = new Dimension(displayWidth, bottomHeight);
-        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS));
+        bottomPanel.setLayout(new BorderLayout());
         bottomPanel.setBackground(Color.BLACK);
+//        bottomPanel.setOpaque(false);
         bottomPanel.setMaximumSize(maxBottomSize);
         bottomPanel.add(new Box.Filler(minBottomSize, prefBottomSize, maxBottomSize));
-        bottomPanel.add(statusLabel);
+        
+        
+        
         // set up the drawArea background
-        Dimension minDrawSize = new Dimension(drawWidth, drawHeight);
-        Dimension prefDrawSize = new Dimension(drawWidth, drawWidth);
-        Dimension maxDrawSize = new Dimension(drawWidth, drawHeight);
-        Box.Filler fillerBox = new Box.Filler(minDrawSize, prefDrawSize, maxDrawSize);
-        JPanel midPanel = new JPanel();
-
-        midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.LINE_AXIS));
-        midPanel.setOpaque(true);
-        // drawArea.setPreferredSize(prefDrawSize);
-        midPanel.setBackground(Color.GREEN);
-        midPanel.add(fillerBox);
+//        Dimension minDrawSize = new Dimension(drawWidth, drawHeight);
+//        Dimension prefDrawSize = new Dimension(drawWidth, drawWidth);
+//        Dimension maxDrawSize = new Dimension(drawWidth, drawHeight);
+//        Box.Filler fillerBox = new Box.Filler(minDrawSize, prefDrawSize, maxDrawSize);
+        
+//        JPanel midPanel = new JPanel();
+//        midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.LINE_AXIS));
+//        midPanel.setOpaque(true);
+//        midPanel.setBackground(Color.GREEN);
+//        midPanel.add(fillerBox);
+        
+        if (DEVELOPER_MODE) {
+//        	frame.setResizable(true);
+//            frame.setSize(new Dimension(displayWidth, drawHeight));
+//            content.add(drawArea, BorderLayout.CENTER);
+            topPanel.add(clearButton);
+            topPanel.add(qButton);
+        	bottomPanel.add(posLabel, BorderLayout.LINE_END);
+            posLabel.setText("Pen Position");
+            posLabel.setForeground(Color.white);
+            
+            statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
+            statusLabel.setText("Status Text");
+            bottomPanel.add(statusLabel, BorderLayout.LINE_START);
+        } else {
+        	
+        	frame.setUndecorated(true);
+        	// Transparent 16 x 16 pixel cursor image.
+            BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+            // Create a new blank cursor.
+            Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+            // Set the blank cursor to the JFrame.
+            content.setCursor(blankCursor);
+//            frame.addFocusListener(new FocusListener() {
+//
+//                @Override
+//                public void focusGained(FocusEvent arg0) {
+//                    frame.setAlwaysOnTop(true);
+//                }
+//
+//                @Override
+//                public void focusLost(FocusEvent arg0) {
+//                    frame.setAlwaysOnTop(false);
+//                }
+//            });
+        }
+        
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setState(JFrame.MAXIMIZED_BOTH);
+        device.setFullScreenWindow(frame);
+        
+        
+        
+        
         // Add everything to frame
         content.add(topPanel, BorderLayout.PAGE_START);
-        content.add(midPanel, BorderLayout.CENTER);
-        content.add(drawArea, BorderLayout.CENTER);
         content.add(bottomPanel, BorderLayout.PAGE_END);
-        frame.addFocusListener(new FocusListener() {
-
-            @Override
-            public void focusGained(FocusEvent arg0) {
-                frame.setAlwaysOnTop(true);
-            }
-
-            @Override
-            public void focusLost(FocusEvent arg0) {
-                frame.setAlwaysOnTop(false);
-            }
-        });
+//        content.add(midPanel, BorderLayout.CENTER);
+        content.add(drawArea, BorderLayout.CENTER);
         // frame.pack();
         clearButton.addActionListener(actionListener);
         qButton.addActionListener(actionListener);
         frame.setVisible(true);
+        
+//        System.out.println("Top Height: " + topPanel.getHeight());
+//        System.out.println("Draw Height: " + drawArea.getHeight());
+//        System.out.println("Bottom Height: " + bottomPanel.getHeight());
+        
     }
 
     // private void btnConnectActionPerformed(ActionEvent e) {

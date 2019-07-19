@@ -2,6 +2,9 @@ package drawingapp;
 
 import java.io.IOException;
 import java.util.LinkedList;
+
+import javax.swing.JLabel;
+
 import com.fazecast.jSerialComm.*;
 
 /**
@@ -15,10 +18,20 @@ public class GcodeSender implements Runnable {
     private String threadName;
     private LinkedList<String> gCodeMessages = new LinkedList<String>();
     MessageListener messageListener = new MessageListener();
-    private final int MESSAGE_DELAY = 5;
-    SerialPort comPorts[];// = SerialPort.getCommPorts()[0];
-    SerialPort serialPort;
-//    String portStr = "/dev/ttyUSB0";
+    private final int MESSAGE_DELAY = 10;
+    // = SerialPort.getCommPorts()[0];
+    private SerialPort serialPort;
+    private JLabel statusLabel;
+    
+public JLabel getStatusLabel() {
+		return statusLabel;
+	}
+
+	public void setStatusLabel(JLabel statusLabel) {
+		this.statusLabel = statusLabel;
+	}
+
+	//    String portStr = "/dev/ttyUSB0";
 //    String portStr = 
     GcodeSender(String name, LinkedList<String> sharedQueue) {
         threadName = name;
@@ -42,8 +55,9 @@ public class GcodeSender implements Runnable {
         // System.out.println("Exiting thread.");
     }
 
-    public void initSerialCommunication() {
+    public boolean initSerialCommunication() {
     	SerialPort ports[] = SerialPort.getCommPorts();
+    	if (ports.length == 0) return false;
     	serialPort = ports[0];
 //        serialPort = SerialPort.getCommPort();
         serialPort.setComPortParameters(115200, 8, 1, 0);
@@ -55,10 +69,11 @@ public class GcodeSender implements Runnable {
 
         } else {
             System.out.println("Failed to open port :(");
-            return;
+            return false;
         }
 
         serialPort.addDataListener(messageListener);
+        return true;
     }
 
     public void start() {
@@ -85,6 +100,7 @@ public class GcodeSender implements Runnable {
             serialPort.getOutputStream().flush();
             messageListener.readyToSend(false);
             System.out.println("Sent: " + gstr);
+            statusLabel.setText(gstr);
             gCodeMessages.notifyAll();
         }
 
@@ -96,26 +112,29 @@ public class GcodeSender implements Runnable {
         serialPort.getOutputStream().write('?');
         serialPort.getOutputStream().flush();
         System.out.println("Sent ?");
+        
         Thread.sleep(1000);
     }
 
     public void unlock() throws IOException, InterruptedException  {
-        serialPort.getOutputStream().write('$');
-        serialPort.getOutputStream().write('X');
-        serialPort.getOutputStream().write('\n');
-        serialPort.getOutputStream().flush();
-        System.out.println("Sent: $X");
+    	writeToSerial("$X");
         Thread.sleep(1000);
     }
 
     public void autoHome() throws IOException, InterruptedException  {
-        serialPort.getOutputStream().write('$');
-        serialPort.getOutputStream().write('H');
-        serialPort.getOutputStream().write('\n');
-        serialPort.getOutputStream().flush();
-        System.out.println("Sent: $X");
+        writeToSerial("$H");
         Thread.sleep(1000);
     }
+    private void writeToSerial(String str) throws IOException {
+    	for(int ii = 0; ii < str.length(); ++ii) {
+    		 serialPort.getOutputStream().write(str.charAt(ii));
+    	}
+    	serialPort.getOutputStream().write('\n');
+        serialPort.getOutputStream().flush();
+        System.out.println("Sent: " + str);
+        statusLabel.setText(str);
+    }
+    
     private final class MessageListener implements SerialPortMessageListener {
         private boolean readyFlag = true;
         @Override
@@ -149,11 +168,11 @@ public class GcodeSender implements Runnable {
                 sb.append(c);
             }
             String msgStr = sb.toString();
-            if (msgStr.equals("\nok\r")){
+            if (msgStr.contains("ok")){
                 readyToSend(true);
                 return "ok\n";
             }
-                
+            statusLabel.setText(msgStr);
             return msgStr;
         }
 
@@ -163,17 +182,6 @@ public class GcodeSender implements Runnable {
         public void readyToSend(boolean rdy){
             readyFlag = rdy;
         }
-        // @Override
-        // public void serialEvent(SerialPortEvent event) {
-        // byte[] newData = event.getReceivedData();
-        // System.out.println("Received data of size: " + newData.length);
-        // char c = 0;
-        // for (int i = 0; i < newData.length; ++i){
-        // c = (char) newData[i];
-        // System.out.print(c);
-        // }
-        // System.out.println("\n");
-        // }
     }
 
     

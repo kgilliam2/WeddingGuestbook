@@ -28,10 +28,6 @@ import javax.swing.SwingUtilities;
 import java.util.LinkedList;
 import drawingapp.CoordinateMessageList;
 
-/**
- * app
- */
-
 public class DrawingApp {
     // boolean flag = false;
     public static final boolean DEVELOPER_MODE = true;
@@ -73,9 +69,6 @@ public class DrawingApp {
 
         gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
         gcs = new GcodeSender("Sender", sharedQueue);
-
-        
-
         gcs.initSerialCommunication();
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -88,7 +81,7 @@ public class DrawingApp {
         gcg.start();
         gcs.start();
         
-        if( !DEVELOPER_MODE) {
+        if(!DEVELOPER_MODE) {
         	try {
 				Thread.sleep(3000);
 				gcs.autoHome();
@@ -106,10 +99,8 @@ public class DrawingApp {
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = env.getDefaultScreenDevice();
         JFrame frame = new JFrame("App Title");
-        // JLabel statusLabel = new JLabel();
         JPanel topPanel = new JPanel();
         JPanel bottomPanel = new JPanel();
-        // comment
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
 
@@ -121,41 +112,27 @@ public class DrawingApp {
         
         statusLabel.setFont(new Font("Courier", Font.PLAIN, 20));
         statusLabel.setForeground(Color.white);
-        // int density = Toolkit.getDefaultToolkit().getScreenResolution();
-        
-        
-        
+
         displayWidth = (int) displaySize.getWidth();
         displayHeight = (int) displaySize.getHeight();
-//        float xTotalTravel = MAX_TRAVEL_X - X_MIN_BUFFER_MM - X_MAX_BUFFER_MM;
-//        float yTotalTravel = MAX_TRAVEL_Y - Y_MIN_BUFFER_MM - Y_MAX_BUFFER_MM;
         float heightWidthRatio = MAX_TRAVEL_Y/MAX_TRAVEL_X;
         drawWidth = displayWidth;
         drawHeight = (int)(displayWidth * heightWidthRatio);
-//        float mmPerPixelX = xTotalTravel / drawWidth;
-//        float mmPerPixelY = yTotalTravel / drawHeight;
-//        float mmPerPixel = mmPerPixelX < mmPerPixelY ? mmPerPixelX : mmPerPixelY;
-        
-//        gcg.setMmPerPixel(mmPerPixel);
-//        gcg.setMaxTravelX(xTotalTravel);
-//        gcg.setMaxTravelY(yTotalTravel);
+
         
         gcg.coordinateSystem().setPixelLimits(drawWidth, drawHeight);
         gcg.coordinateSystem().setPaperLimits(
         		X_MIN_BUFFER_MM, MAX_TRAVEL_X - X_MAX_BUFFER_MM, 
         		MAX_TRAVEL_Y - Y_MAX_BUFFER_MM, Y_MIN_BUFFER_MM );
-        
-        
+
         topHeight = (displayHeight - drawHeight) / 2;
         bottomHeight = displayHeight - drawHeight - topHeight; //topHeight;// - statusLabel.getHeight();
 
-        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         content = frame.getContentPane();
         content.setLayout(new BorderLayout());
         drawArea = new DrawArea(coordsQueue, drawWidth, drawHeight);
-        
-        
+
      // Set up the top panel
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
         Dimension minTopSize = new Dimension(0, 0);
@@ -166,7 +143,6 @@ public class DrawingApp {
         topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
 
         // Set up bottom panel
-        
         Dimension minBottomSize = new Dimension(0, 0);
         Dimension prefBottomSize = new Dimension(displayWidth, bottomHeight);
         Dimension maxBottomSize = new Dimension(displayWidth, bottomHeight);
@@ -175,9 +151,7 @@ public class DrawingApp {
 //        bottomPanel.setOpaque(false);
         bottomPanel.setMaximumSize(maxBottomSize);
         bottomPanel.add(new Box.Filler(minBottomSize, prefBottomSize, maxBottomSize));
-        
-        
-        
+
         // set up the drawArea background
 //        Dimension minDrawSize = new Dimension(drawWidth, drawHeight);
 //        Dimension prefDrawSize = new Dimension(drawWidth, drawWidth);
@@ -230,9 +204,6 @@ public class DrawingApp {
         frame.setState(JFrame.MAXIMIZED_BOTH);
         device.setFullScreenWindow(frame);
         
-        
-        
-        
         // Add everything to frame
         content.add(topPanel, BorderLayout.PAGE_START);
         content.add(bottomPanel, BorderLayout.PAGE_END);
@@ -242,10 +213,6 @@ public class DrawingApp {
         clearButton.addActionListener(actionListener);
         qButton.addActionListener(actionListener);
         frame.setVisible(true);
-        
-//        System.out.println("Top Height: " + topPanel.getHeight());
-//        System.out.println("Draw Height: " + drawArea.getHeight());
-//        System.out.println("Bottom Height: " + bottomPanel.getHeight());
         
     }
 

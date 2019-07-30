@@ -32,7 +32,7 @@ public JLabel getStatusLabel() {
 		this.statusLabel = statusLabel;
 	}
 
-	//    String portStr = "/dev/ttyUSB0";
+	//    
 //    String portStr = 
     GcodeSender(String name, LinkedList<String> sharedQueue) {
         threadName = name;
@@ -57,9 +57,11 @@ public JLabel getStatusLabel() {
     }
 
     public boolean initSerialCommunication() {
-    	SerialPort ports[] = SerialPort.getCommPorts();
-    	if (ports.length == 0) return false;
-    	serialPort = ports[0];
+        String portStr = "/dev/ttyUSB0";
+        serialPort = SerialPort.getCommPort(portStr);
+    	// SerialPort ports[] = SerialPort.getCommPorts();
+    	// if (ports.length == 0) return false;
+    	// serialPort = ports[0];
 //        serialPort = SerialPort.getCommPort();
         serialPort.setComPortParameters(115200, 8, 1, 0);
         // sp.setComPortTimeouts(SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0); // block

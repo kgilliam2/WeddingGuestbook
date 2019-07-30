@@ -27,7 +27,7 @@ public class DrawArea extends JComponent {
     private Image image;
     private Graphics2D g2d;
     private int currX, currY, prevX, prevY, newX, newY;
-    private boolean penDown;
+    private boolean penUp;
     private int areaWidth, areaHeight;
     CoordinateMessageList coordsQueue;
     
@@ -88,27 +88,27 @@ public class DrawArea extends JComponent {
         public void mousePressed(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            penDown = true;
+            penUp = false;
             addCoordinateMessage();
             if (newX >=0 && newX <= areaWidth) prevX = newX;
             if (newY >=0 && newY <= areaHeight) prevY = newY;
             addCoordinateMessage();
         }
         public void mouseReleased(MouseEvent e) {
-        	penDown = false;
+        	penUp = true;
         	addCoordinateMessage();
         }
         public void mouseEntered(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            penDown = false;
+            // penUp = true;
             addCoordinateMessage();
             if (newX >=0 && newX <= areaWidth) prevX = newX;
             if (newY >=0 && newY <= areaHeight) prevY = newY;
             addCoordinateMessage();
         }
         public void mouseExited(MouseEvent e) {
-        	penDown = false;
+        	// penDown = false;
         	addCoordinateMessage();
         }
      }
@@ -117,7 +117,7 @@ public class DrawArea extends JComponent {
         public void mouseMoved(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            penDown = false;
+            // penDown = false;
 //            if (newX >=0 && newX <= areaWidth) {
 //                currX = newX;
 //                prevX = currX;
@@ -150,7 +150,7 @@ public class DrawArea extends JComponent {
             setNewX(e.getX());
             setNewY(e.getY());
             
-            penDown = true;
+            penUp = false;
             addCoordinateMessage();
             
             if (newX >=0 && newX <= areaWidth){
@@ -178,7 +178,7 @@ public class DrawArea extends JComponent {
      }
      public void addCoordinateMessage(){
          synchronized(coordsQueue){
-            CoordinateMessage msg = new CoordinateMessage(currX, currY, prevX, prevY, penDown);
+            CoordinateMessage msg = new CoordinateMessage(currX, currY, prevX, prevY, penUp);
             coordsQueue.addCoordinatesToList(msg);
             // System.out.println("Adding a message from DrawArea: [" + currX + ", " + currY + "]" );
             coordsQueue.notify();

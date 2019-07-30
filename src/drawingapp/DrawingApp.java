@@ -36,7 +36,7 @@ public class DrawingApp {
     public static final float X_MIN_BUFFER_MM = 5;
     public static final float X_MAX_BUFFER_MM = 5;
     public static final float MAX_TRAVEL_X = 800;
-    public static final float MAX_TRAVEL_Y = 340;
+    public static final float MAX_TRAVEL_Y = 300;
     public static GcodeGenerator gcg;
     public static GcodeSender gcs;
 

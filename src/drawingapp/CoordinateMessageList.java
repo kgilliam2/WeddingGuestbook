@@ -11,35 +11,18 @@ public class CoordinateMessageList {
     private LinkedList<CoordinateMessage> coordsList = new LinkedList<CoordinateMessage>();
     private boolean bPenStateChanged;
 
-    public void addCoordinatesToList(int X, int Y, boolean penDown) {
-        if (coordsList.size() > 0) {
-            int prevX = coordsList.getLast().currentX();
-            int prevY = coordsList.getLast().currentY();
-            boolean prevPenDown = coordsList.getLast().isPenDown();
-            if (prevPenDown != penDown) {
-                CoordinateMessage msg1 = new CoordinateMessage(prevX, prevY, penDown);
-                
-                for(int ii = 1; ii < 1000; ++ii){
-                    System.out.println("DROPPING THE PEN MOTHERFUCKEERRRRSSSSSS");
-                    coordsList.addLast(msg1);
-                }
-                
-                // try {
-                //     Thread.sleep(300);
-                // } catch (InterruptedException e) {
-                //     // TODO Auto-generated catch block
-                //     e.printStackTrace();
-                // }
-            }
-        }
-        CoordinateMessage msg2 = new CoordinateMessage(X, Y, penDown);
+    public void addCoordinatesToList(PenStates penState, int X, int Y) {
+        PenStates prevPenState;
+        if (coordsList.size() > 0)
+            prevPenState = coordsList.getLast().getPenState();
+        else
+            prevPenState = PenStates.PEN_UP;
+            
+        bPenStateChanged = prevPenState != penState;
+        CoordinateMessage msg2 = new CoordinateMessage(penState, X, Y);
         coordsList.addLast(msg2);
 
     }
-    // public void addCoordinatesToList(CoordinateMessage msg){
-    // coordsList.addLast(msg);
-    // }
-
     public int getSize() {
         return coordsList.size();
     }
@@ -60,11 +43,7 @@ public class CoordinateMessageList {
     }
 
     public boolean penStateChanged() {
-        if (this.bPenStateChanged) {
-            this.bPenStateChanged = false;
-            return true;
-        }
-        return false;
+            return this.bPenStateChanged;
     }
 
     public void addCoordinatesToList(CoordinateMessage msg) {

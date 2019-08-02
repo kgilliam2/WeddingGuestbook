@@ -19,9 +19,10 @@ public class GcodeSender implements Runnable {
     private LinkedList<String> gCodeMessages = new LinkedList<String>();
     MessageListener messageListener = new MessageListener();
     private final int MESSAGE_DELAY = 10;
-    // = SerialPort.getCommPorts()[0];
     private SerialPort serialPort;
     private JLabel statusLabel;
+    private int sentMessages = 0;
+    private int queueLength = 0;
     private long lastCommandTime = 0;
     
 public JLabel getStatusLabel() {
@@ -44,7 +45,13 @@ public JLabel getStatusLabel() {
         System.out.println("Running " + threadName);
         while (true) {
             try {
-                sendGcode();
+                // queueLength = sentMessages - messageListener.ackedMessages;
+                
+                // if (queueLength == 0){
+                    // System.out.println(queueLength);
+                    sendGcode();
+                // }
+                    
                 // do thread stuff
                 // System.out.println("Threading is happening [" + threadName + "]");
             } catch (Exception e) {
@@ -68,7 +75,7 @@ public JLabel getStatusLabel() {
         // until bytes can be written
 
         if (serialPort.openPort()) {
-            System.out.println("Port is open BITCHES");
+            System.out.println("Port is open");
 
         } else {
             System.out.println("Failed to open port :(");
@@ -95,17 +102,8 @@ public JLabel getStatusLabel() {
             // Thread.sleep(MESSAGE_DELAY);
             String gstr = gCodeMessages.getFirst();
             writeToSerial(gstr);
+            sentMessages++;
             gCodeMessages.removeFirst();
-            
-//            char[] gcChar = gstr.toCharArray();
-//            for(int i = 0; i < gcChar.length; ++i){
-//                serialPort.getOutputStream().write(gcChar[i]);
-//            }
-//            serialPort.getOutputStream().write('\n');
-//            serialPort.getOutputStream().flush();
-            
-//            System.out.println("Sent: " + gstr);
-//            statusLabel.setText(gstr);
             gCodeMessages.notifyAll();
         }
 
@@ -136,6 +134,7 @@ public JLabel getStatusLabel() {
     	}
     	serialPort.getOutputStream().write('\n');
         serialPort.getOutputStream().flush();
+        
         System.out.println("Sent: " + str);
         statusLabel.setText(str);
         messageListener.readyToSend(false);
@@ -144,6 +143,7 @@ public JLabel getStatusLabel() {
     
     private final class MessageListener implements SerialPortMessageListener {
         private boolean readyFlag = true;
+        private int ackedMessages = 0;
         @Override
         public int getListeningEvents() {
             return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
@@ -163,7 +163,6 @@ public JLabel getStatusLabel() {
         @Override
         public void serialEvent(SerialPortEvent event) {
             byte[] delimitedMessage = event.getReceivedData();
-
             System.out.println("Received: " + parseMessage(delimitedMessage));
         }
 
@@ -177,7 +176,9 @@ public JLabel getStatusLabel() {
             String msgStr = sb.toString();
             if (msgStr.contains("ok")){
                 readyToSend(true);
-                return "ok\n";
+                // ackedMessages++;
+            }else if (msgStr.contains("error")){
+                readyToSend(false);
             }
             statusLabel.setText(msgStr);
             return msgStr;

@@ -17,12 +17,8 @@ public class GcodeGenerator implements Runnable{
     private String nextGcodeString;
     private static int MAX_GCODE_CAPACITY;
     private static final int MESSAGE_DELAY = 10;
-//    public static float yMinBuff;
-//    public static float yMaxBuff;
-//    public static float xMinBuff;
-//    public static float xMaxBuff;
-//    private float mmPerPixelX, mmPerPixelY;
-//    private float maxTravelX, maxTravelY;
+    private static final float PEN_LIFT_DELAY = (float)0.3; //seconds
+    // private static final String JOG_COMMAND_FORMATTER = "$J ="
     private pixelToPaperTransform TX;
     private final float FEED_RATE = 8000;
     private JLabel posLabel;
@@ -50,25 +46,23 @@ public class GcodeGenerator implements Runnable{
                     if(coordinatesQueue.CoordinatesAvailable()){
                         
                         CoordinateMessage msg = coordinatesQueue.getNextCoordinates();
-                        nextGcodeString = parseCoordinatesToGcode(msg);
+                        if(coordinatesQueue.penStateChanged()) {
+                            nextGcodeString = generatePenLiftGcode(msg);
+                            addGcodeToQueue(nextGcodeString);
+                            // nextGcodeString = generateDelayGcode(PEN_LIFT_DELAY);
+                            // addGcodeToQueue(nextGcodeString);
+                        } 
+                        else 
+                            nextGcodeString = parseCoordinatesToGcode(msg);
                         addGcodeToQueue(nextGcodeString);
-                        // if(coordinatesQueue.penStateChanged()){
-                        //     Thread.sleep(400);
-                        // }
-                        // System.out.println("Coordinates Available");
                         coordinatesQueue.wait();
                     }
                 }
-                
-
-                // System.out.println("Threading is happening [" + threadName + "]");
             } catch (InterruptedException e) {
                 System.out.println("Thread interrupted.");
                 e.printStackTrace();
             }
         }
-        
-       // System.out.println("Exiting thread.");
     }
     public void start(){
         System.out.println("Starting " + threadName); 
@@ -85,18 +79,35 @@ public class GcodeGenerator implements Runnable{
                 gCodeMessages.wait(MESSAGE_DELAY);
             }
             gCodeMessages.addLast(gCodeStr);
-            // messagesAddedCount++;
-            // System.out.println("Generated GCode: [" + 
-            //      + messagesAddedCount + ", " + gCodeMessages.size() + "]: " + gCodeStr );
-            // Thread.sleep(SLEEP_TIME);
             gCodeMessages.notify();
         }
+    }
+    private String generatePenLiftGcode(CoordinateMessage msg){
+        StringBuilder sBuilder = new StringBuilder();
+        float cZ = msg.currentZ();
+        sBuilder.append("$J =");
+        sBuilder.append(" G90"); //Absolute distances
+        // sBuilder.append(" G91"); //Incremental distances
+        sBuilder.append(" G21"); //Millimeter mode
+
+        sBuilder.append(" Z");
+        sBuilder.append(String.format("%.3f", cZ));
+        sBuilder.append(" F");
+        sBuilder.append(FEED_RATE/200);
+        // sBuilder.append("\n");
+        return sBuilder.toString();
+    }
+    private String generateDelayGcode(float delay){
+        StringBuilder sBuilder = new StringBuilder();
+        sBuilder.append("G4 P");
+        sBuilder.append(String.format("%1.2f", delay));
+        // sBuilder.append("\n");
+        return sBuilder.toString();
     }
     private String parseCoordinatesToGcode(CoordinateMessage msg){
         float cX = TX.transformXCoordinate(msg.currentX());
         float cY = TX.transformYCoordinate(msg.currentY());
-        
-        float cZ = msg.isPenDown() ? -1 : 1;
+        float cZ = msg.currentZ();
         
         posLabel.setText("X: " + msg.currentX() + "Y: " + msg.currentY());
         StringBuilder sBuilder = new StringBuilder();
@@ -106,6 +117,7 @@ public class GcodeGenerator implements Runnable{
         sBuilder.append(" G90"); //Absolute distances
         // sBuilder.append(" G91"); //Incremental distances
         sBuilder.append(" G21"); //Millimeter mode
+        
         sBuilder.append(" X");
         sBuilder.append(String.format("%.3f", cX));
         sBuilder.append(" Y");
@@ -114,7 +126,7 @@ public class GcodeGenerator implements Runnable{
         sBuilder.append(String.format("%.3f", cZ));
         sBuilder.append(" F");
         sBuilder.append(FEED_RATE);
-        sBuilder.append("\n");
+        // sBuilder.append("\n");
         
         return sBuilder.toString();
     }

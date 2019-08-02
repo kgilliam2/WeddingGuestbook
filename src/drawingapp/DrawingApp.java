@@ -55,7 +55,7 @@ public class DrawingApp {
             } else if (e.getSource() == qButton) {
                 // btnConnectActionPerformed(e);
                 try {
-                    gcs.query();
+                    // gcs.query();
                     // gcs.unlock();
                     gcs.autoHome();
                 } catch (IOException | InterruptedException e1) {

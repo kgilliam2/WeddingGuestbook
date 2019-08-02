@@ -13,24 +13,21 @@ import javax.swing.JComponent;
 // import javax.swing.JLabel;
 
 import drawingapp.CoordinateMessageList;
+
 /**
  * DrawArea
  */
 
-
-
 public class DrawArea extends JComponent {
 
     private static final long serialVersionUID = 1L;
-
-    
     private Image image;
     private Graphics2D g2d;
     private int currX, currY, prevX, prevY, newX, newY;
-    private boolean penUp;
     private int areaWidth, areaHeight;
     CoordinateMessageList coordsQueue;
-    
+    private PenStates penState = PenStates.PEN_UP;
+
     public DrawArea(CoordinateMessageList sharedQueue, int width, int height) {
         coordsQueue = sharedQueue;
         areaWidth = width;
@@ -41,204 +38,209 @@ public class DrawArea extends JComponent {
         addMouseMotionListener(new CustomMouseMotionListener());
     }
 
-    protected void paintComponent(Graphics g){
-        if (image == null){
-            //Create image
+    protected void paintComponent(Graphics g) {
+        if (image == null) {
+            // Create image
             image = createImage(areaWidth, areaHeight);
             g2d = (Graphics2D) image.getGraphics();
             g2d.setStroke(new BasicStroke(3));
-            //Enable antialiasing
-            g2d.setRenderingHint(
-            		RenderingHints.KEY_ANTIALIASING,
-            		RenderingHints.VALUE_ANTIALIAS_ON
-            		);
-            //Clear drawing area
+            // Enable antialiasing
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            // Clear drawing area
             clear();
 
         }
         g.drawImage(image, 0, 0, null);
     }
 
-    public void clear(){
+    public void clear() {
         g2d.setPaint(Color.white);
-        //Draw a white rectangle which fills entire area
+        // Draw a white rectangle which fills entire area
         g2d.fillRect(0, 0, getSize().width, getSize().height);
         g2d.setPaint(Color.green);
         repaint();
     }
 
-    public void red(){
+    public void red() {
         g2d.setPaint(Color.red);
     }
-    public void black(){
+
+    public void black() {
         g2d.setPaint(Color.black);
     }
-    public void green(){
+
+    public void green() {
         g2d.setPaint(Color.green);
     }
-    public void blue(){
+
+    public void blue() {
         g2d.setPaint(Color.blue);
     }
 
     class CustomMouseListener implements MouseListener {
-        //  private JLabel statusLabel;
+        // private JLabel statusLabel;
         public void mouseClicked(MouseEvent e) {
-//           statusLabel.setText("Mouse Clicked: ("+e.getX()+", "+e.getY() +")");
+            // statusLabel.setText("Mouse Clicked: ("+e.getX()+", "+e.getY() +")");
+            // setNewX(e.getX());
+            // setNewY(e.getY());
+            // penState = PenStates.PEN_DOWN;
+            // addCoordinateMessage();
+            // if (newX >= 0 && newX <= areaWidth)
+            //     prevX = newX;
+            // if (newY >= 0 && newY <= areaHeight)
+            //     prevY = newY;
+            // addCoordinateMessage();
+            // penState = PenStates.PEN_UP;
+            // addCoordinateMessage();
         }
+
         public void mousePressed(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            penUp = false;
+            penState = PenStates.PEN_DOWN;
             addCoordinateMessage();
-            if (newX >=0 && newX <= areaWidth) prevX = newX;
-            if (newY >=0 && newY <= areaHeight) prevY = newY;
+            if (newX >= 0 && newX <= areaWidth)
+                prevX = newX;
+            if (newY >= 0 && newY <= areaHeight)
+                prevY = newY;
             addCoordinateMessage();
         }
+
         public void mouseReleased(MouseEvent e) {
-        	penUp = true;
-        	addCoordinateMessage();
+            penState = PenStates.PEN_UP;
+            addCoordinateMessage();
         }
+
         public void mouseEntered(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            // penUp = true;
+            penState = PenStates.PEN_UP;
             addCoordinateMessage();
-            if (newX >=0 && newX <= areaWidth) prevX = newX;
-            if (newY >=0 && newY <= areaHeight) prevY = newY;
+            if (newX >= 0 && newX <= areaWidth)
+                prevX = newX;
+            if (newY >= 0 && newY <= areaHeight)
+                prevY = newY;
             addCoordinateMessage();
         }
+
         public void mouseExited(MouseEvent e) {
-        	// penDown = false;
-        	addCoordinateMessage();
+            // penDown = false;
+            addCoordinateMessage();
         }
-     }
-     class CustomMouseMotionListener implements MouseMotionListener{
+    }
+
+    class CustomMouseMotionListener implements MouseMotionListener {
 
         public void mouseMoved(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            // penDown = false;
-//            if (newX >=0 && newX <= areaWidth) {
-//                currX = newX;
-//                prevX = currX;
-//            }
-//            if (newY >=0 && newY <= areaHeight) {
-//                currY = newY;
-//                prevY = currY;
-//            }
-            if(moveDistance() < 200 ) {
-            	return;
+            if (moveDistance() < 200) {
+                return;
             }
-            if (newX >=0 && newX <= areaWidth){
+            if (newX >= 0 && newX <= areaWidth) {
                 currX = newX;
-            } 
-            else{
+            } else {
                 currX = newX < 0 ? 0 : areaWidth;
             }
-            if (newY >=0 && newY <= areaHeight) {
+            if (newY >= 0 && newY <= areaHeight) {
                 currY = newY;
-            }
-            else{
+            } else {
                 currY = newY < 0 ? 0 : areaHeight;
             }
-            
+
             addCoordinateMessage();
             // addCoordinateMessage();
         }
-    
+
         public void mouseDragged(MouseEvent e) {
             setNewX(e.getX());
             setNewY(e.getY());
-            
-            penUp = false;
+
+            // penState = PenStates.PEN_DOWN;
             addCoordinateMessage();
-            
-            if (newX >=0 && newX <= areaWidth){
+
+            if (newX >= 0 && newX <= areaWidth) {
                 currX = newX;
-            } 
-            else{
+            } else {
                 currX = newX < 0 ? 0 : areaWidth;
             }
-            if (newY >=0 && newY <= areaHeight) {
+            if (newY >= 0 && newY <= areaHeight) {
                 currY = newY;
-            }
-            else{
+            } else {
                 currY = newY < 0 ? 0 : areaHeight;
             }
-            
+
             addCoordinateMessage();
-            if(g2d != null){
+            if (g2d != null) {
                 g2d.drawLine(prevX, prevY, currX, currY);
                 repaint();
                 prevX = currX;
                 prevY = currY;
             }
-            
+
         }
-     }
-     public void addCoordinateMessage(){
-         synchronized(coordsQueue){
-            // CoordinateMessage msg = new CoordinateMessage(currX, currY, penUp);
-            // coordsQueue.addCoordinatesToList(msg);
-            coordsQueue.addCoordinatesToList(currX, currY, penUp);
-            // System.out.println("Adding a message from DrawArea: [" + currX + ", " + currY + "]" );
+    }
+
+    public void addCoordinateMessage() {
+        synchronized (coordsQueue) {
+            coordsQueue.addCoordinatesToList(penState, currX, currY);
             coordsQueue.notify();
-         }
-        
-     }
-     
-     public int getCurrX() {
-		return currX;
-	}
+        }
 
-	public void setCurrX(int currX) {
-		this.currX = currX;
-	}
+    }
 
-	public int getCurrY() {
-		return currY;
-	}
+    public int getCurrX() {
+        return currX;
+    }
 
-	public void setCurrY(int currY) {
-		this.currY = currY;
-	}
+    public void setCurrX(int currX) {
+        this.currX = currX;
+    }
 
-	public int getPrevX() {
-		return prevX;
-	}
+    public int getCurrY() {
+        return currY;
+    }
 
-	public void setPrevX(int prevX) {
-		this.prevX = prevX;
-	}
+    public void setCurrY(int currY) {
+        this.currY = currY;
+    }
 
-	public int getPrevY() {
-		return prevY;
-	}
+    public int getPrevX() {
+        return prevX;
+    }
 
-	public void setPrevY(int prevY) {
-		this.prevY = prevY;
-	}
+    public void setPrevX(int prevX) {
+        this.prevX = prevX;
+    }
 
-	public int getNewX() {
-		return newX;
-	}
+    public int getPrevY() {
+        return prevY;
+    }
 
-	public void setNewX(int newX) {
-		this.newX = newX;
-	}
+    public void setPrevY(int prevY) {
+        this.prevY = prevY;
+    }
 
-	public int getNewY() {
-		return newY;
-	}
+    public int getNewX() {
+        return newX;
+    }
 
-	public void setNewY(int newY) {
-		this.newY = newY;
-	}
+    public void setNewX(int newX) {
+        this.newX = newX;
+    }
 
-	private int moveDistance() {
-    	 int dX, dY;
-    	 dX = currX - newX;
-    	 dY = currY - newY;
-    	 return (int) Math.sqrt(dX*dX + dY*dY);			
-     }
+    public int getNewY() {
+        return newY;
+    }
+
+    public void setNewY(int newY) {
+        this.newY = newY;
+    }
+
+    private int moveDistance() {
+        int dX, dY;
+        dX = currX - newX;
+        dY = currY - newY;
+        return (int) Math.sqrt(dX * dX + dY * dY);
+    }
 }

@@ -5,13 +5,13 @@ package drawingapp;
 
 public class CoordinateMessage {
 
-    private int X, Y; //, prevX, prevY;
-    private boolean penDown;
+    private int X, Y, Z;
+    private PenStates penState;
 
-    CoordinateMessage(int cX, int cY, boolean penDown){
+    CoordinateMessage(PenStates penState, int cX, int cY){
         this.X = cX;
         this.Y = cY;
-        setPenDown(penDown);
+        setPenPosition(penState);
     }
     public int currentX(){
         return X;
@@ -19,22 +19,20 @@ public class CoordinateMessage {
     public int currentY(){
         return Y;
     }
-    // public int previousX(){
-    //     return prevX;
-    // }
-    // public int previousY(){
-    //     return prevY;
-    // }
-    // public int deltaX(){
-    //     return currX - prevX;
-    // }
-    // public int deltaY(){
-    //     return currY - prevY;
-    // }
-	public boolean isPenDown() {
-		return penDown;
-	}
-	public void setPenDown(boolean penDown) {
-		this.penDown = penDown;
+	public int currentZ() {
+		return Z;
+    }
+    public boolean penIsUp(){
+        return this.penState == PenStates.PEN_UP;
+    }
+    public boolean penIsDown(){
+        return this.penState != PenStates.PEN_DOWN;
+    }
+    public PenStates getPenState(){
+        return this.penState;
+    }
+	public void setPenPosition(PenStates penState) {
+        this.Z = penState == PenStates.PEN_UP ? -1 : 1;
+        this.penState = penState;
 	}
 }

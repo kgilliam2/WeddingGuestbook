@@ -13,8 +13,8 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+// import java.awt.event.FocusEvent;
+// import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 

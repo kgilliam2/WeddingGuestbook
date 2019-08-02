@@ -178,8 +178,9 @@ public class DrawArea extends JComponent {
      }
      public void addCoordinateMessage(){
          synchronized(coordsQueue){
-            CoordinateMessage msg = new CoordinateMessage(currX, currY, prevX, prevY, penUp);
-            coordsQueue.addCoordinatesToList(msg);
+            // CoordinateMessage msg = new CoordinateMessage(currX, currY, penUp);
+            // coordsQueue.addCoordinatesToList(msg);
+            coordsQueue.addCoordinatesToList(currX, currY, penUp);
             // System.out.println("Adding a message from DrawArea: [" + currX + ", " + currY + "]" );
             coordsQueue.notify();
          }

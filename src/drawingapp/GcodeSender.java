@@ -59,7 +59,6 @@ public JLabel getStatusLabel() {
     public boolean initSerialCommunication() {
         String portStr = "/dev/ttyUSB0";
         serialPort = SerialPort.getCommPort(portStr);
-        
     	// SerialPort ports[] = SerialPort.getCommPorts();
     	// if (ports.length == 0) return false;
     	// serialPort = ports[0];
@@ -69,7 +68,7 @@ public JLabel getStatusLabel() {
         // until bytes can be written
 
         if (serialPort.openPort()) {
-            System.out.println("Port is open :)");
+            System.out.println("Port is open BITCHES");
 
         } else {
             System.out.println("Failed to open port :(");

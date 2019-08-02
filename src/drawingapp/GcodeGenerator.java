@@ -24,7 +24,7 @@ public class GcodeGenerator implements Runnable{
 //    private float mmPerPixelX, mmPerPixelY;
 //    private float maxTravelX, maxTravelY;
     private pixelToPaperTransform TX;
-    private final float FEED_RATE = 10000;
+    private final float FEED_RATE = 8000;
     private JLabel posLabel;
     
     
@@ -48,9 +48,13 @@ public class GcodeGenerator implements Runnable{
                 //do thread stuff
                 synchronized(coordinatesQueue){
                     if(coordinatesQueue.CoordinatesAvailable()){
+                        
                         CoordinateMessage msg = coordinatesQueue.getNextCoordinates();
                         nextGcodeString = parseCoordinatesToGcode(msg);
                         addGcodeToQueue(nextGcodeString);
+                        // if(coordinatesQueue.penStateChanged()){
+                        //     Thread.sleep(400);
+                        // }
                         // System.out.println("Coordinates Available");
                         coordinatesQueue.wait();
                     }

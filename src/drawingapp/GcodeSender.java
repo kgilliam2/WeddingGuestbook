@@ -24,7 +24,8 @@ public class GcodeSender implements Runnable {
     private int sentMessages = 0;
     private int queueLength = 0;
     private long lastCommandTime = 0;
-    
+    private boolean gcodeEnabled = false;
+
 public JLabel getStatusLabel() {
 		return statusLabel;
 	}
@@ -46,10 +47,10 @@ public JLabel getStatusLabel() {
         while (true) {
             try {
                 // queueLength = sentMessages - messageListener.ackedMessages;
-                
-                // if (queueLength == 0){
-                    // System.out.println(queueLength);
-                    sendGcode();
+                    // if ( gcodeEnabled ) {
+                        sendGcode();
+                    // }
+                        
                 // }
                     
                 // do thread stuff
@@ -96,7 +97,7 @@ public JLabel getStatusLabel() {
 
     public void sendGcode() throws InterruptedException, IOException {
         synchronized (gCodeMessages) {
-            while (gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
+            while ( gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
                 gCodeMessages.wait(MESSAGE_DELAY);
             }
             // Thread.sleep(MESSAGE_DELAY);
@@ -109,6 +110,18 @@ public JLabel getStatusLabel() {
 
     }
 
+    public void programGRBL() throws IOException, InterruptedException {
+        this.disableGcode();
+        GRBL_Setting_Strings GSS_Obj = new GRBL_Setting_Strings();
+        
+        int num = GSS_Obj.size();
+        for (int ii = 0; ii < num; ++ii){
+            String str = GSS_Obj.at(ii);
+            writeToSerial(str);
+            Thread.sleep(100);
+        }
+        this.enableGcode();
+    }
     
 
     public void query() throws IOException, InterruptedException {
@@ -125,6 +138,7 @@ public JLabel getStatusLabel() {
     }
 
     public void autoHome() throws IOException, InterruptedException  {
+        this.enableGcode();
         writeToSerial("$H");
         Thread.sleep(1000);
     }
@@ -133,14 +147,19 @@ public JLabel getStatusLabel() {
     		 serialPort.getOutputStream().write(str.charAt(ii));
     	}
     	serialPort.getOutputStream().write('\n');
-        serialPort.getOutputStream().flush();
+        // serialPort.getOutputStream().flush();
         
         System.out.println("Sent: " + str);
         statusLabel.setText(str);
         messageListener.readyToSend(false);
         lastCommandTime = System.currentTimeMillis();
     }
-    
+    public void disableGcode(){
+        gcodeEnabled = false;
+    }
+    public void enableGcode(){
+        gcodeEnabled = true;
+    }
     private final class MessageListener implements SerialPortMessageListener {
         private boolean readyFlag = true;
         private int ackedMessages = 0;
@@ -192,5 +211,6 @@ public JLabel getStatusLabel() {
         }
     }
 
+    
 
 }

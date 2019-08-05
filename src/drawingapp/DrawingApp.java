@@ -41,8 +41,10 @@ public class DrawingApp {
     public static GcodeSender gcs;
 
     DrawArea drawArea;
-    Button clearButton = new Button("Clear");
-    Button qButton = new Button("???????");
+    Button clearButton = new Button("CLEAR");
+    Button homeButton = new Button("HOME");
+    Button progButton = new Button("PROGRAM");
+
     Dimension displaySize = Toolkit.getDefaultToolkit().getScreenSize();
 
     static LinkedList<String> sharedQueue = new LinkedList<String>();
@@ -52,13 +54,18 @@ public class DrawingApp {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == clearButton) {
                 drawArea.clear();
-            } else if (e.getSource() == qButton) {
+            } else if (e.getSource() == homeButton) {
                 // btnConnectActionPerformed(e);
-                try {
-                    // gcs.query();
-                    // gcs.unlock();
+                try {   
                     gcs.autoHome();
                 } catch (IOException | InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            } else if (e.getSource() == progButton){
+                    try {
+                    gcs.programGRBL();
+                } catch (IOException | InterruptedException e1) {
+                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
             }
@@ -103,6 +110,7 @@ public class DrawingApp {
         JPanel bottomPanel = new JPanel();
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
+
 
         JLabel statusLabel = new JLabel();
         JLabel posLabel = new JLabel();
@@ -168,8 +176,17 @@ public class DrawingApp {
 //        	frame.setResizable(true);
 //            frame.setSize(new Dimension(displayWidth, drawHeight));
 //            content.add(drawArea, BorderLayout.CENTER);
+            clearButton.setBackground(Color.white);
+            clearButton.setFont(new Font("Arial", Font.PLAIN, 30));
+            homeButton.setBackground(Color.white);
+            homeButton.setFont(new Font("Arial", Font.PLAIN, 30));
+            progButton.setBackground(Color.white);
+            progButton.setFont(new Font("Arial", Font.PLAIN, 30));
+
             topPanel.add(clearButton);
-            topPanel.add(qButton);
+            topPanel.add(homeButton);
+            topPanel.add(progButton);
+
         	bottomPanel.add(posLabel, BorderLayout.LINE_END);
             posLabel.setText("Pen Position");
             posLabel.setForeground(Color.white);
@@ -211,7 +228,8 @@ public class DrawingApp {
         content.add(drawArea, BorderLayout.CENTER);
         // frame.pack();
         clearButton.addActionListener(actionListener);
-        qButton.addActionListener(actionListener);
+        homeButton.addActionListener(actionListener);
+        progButton.addActionListener(actionListener);
         frame.setVisible(true);
         
     }

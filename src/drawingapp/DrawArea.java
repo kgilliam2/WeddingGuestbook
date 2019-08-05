@@ -27,6 +27,7 @@ public class DrawArea extends JComponent {
     private int areaWidth, areaHeight;
     CoordinateMessageList coordsQueue;
     private PenStates penState = PenStates.PEN_UP;
+    private boolean dragCorrectFlag = false;
 
     public DrawArea(CoordinateMessageList sharedQueue, int width, int height) {
         coordsQueue = sharedQueue;
@@ -81,14 +82,14 @@ public class DrawArea extends JComponent {
         // private JLabel statusLabel;
         public void mouseClicked(MouseEvent e) {
             // statusLabel.setText("Mouse Clicked: ("+e.getX()+", "+e.getY() +")");
-            // setNewX(e.getX());
-            // setNewY(e.getY());
+            setNewX(e.getX());
+            setNewY(e.getY());
             // penState = PenStates.PEN_DOWN;
             // addCoordinateMessage();
-            // if (newX >= 0 && newX <= areaWidth)
-            //     prevX = newX;
-            // if (newY >= 0 && newY <= areaHeight)
-            //     prevY = newY;
+            if (newX >= 0 && newX <= areaWidth)
+                prevX = newX;
+            if (newY >= 0 && newY <= areaHeight)
+                prevY = newY;
             // addCoordinateMessage();
             // penState = PenStates.PEN_UP;
             // addCoordinateMessage();
@@ -104,10 +105,12 @@ public class DrawArea extends JComponent {
             if (newY >= 0 && newY <= areaHeight)
                 prevY = newY;
             addCoordinateMessage();
+            dragCorrectFlag = true;
         }
 
         public void mouseReleased(MouseEvent e) {
             penState = PenStates.PEN_UP;
+            dragCorrectFlag = false;
             addCoordinateMessage();
         }
 
@@ -121,11 +124,13 @@ public class DrawArea extends JComponent {
             if (newY >= 0 && newY <= areaHeight)
                 prevY = newY;
             addCoordinateMessage();
+            dragCorrectFlag = false;
         }
 
         public void mouseExited(MouseEvent e) {
             // penDown = false;
-            addCoordinateMessage();
+            // addCoordinateMessage();
+            dragCorrectFlag = false;
         }
     }
 
@@ -171,13 +176,15 @@ public class DrawArea extends JComponent {
             }
 
             addCoordinateMessage();
-            if (g2d != null) {
-                g2d.drawLine(prevX, prevY, currX, currY);
-                repaint();
-                prevX = currX;
-                prevY = currY;
+            if(dragCorrectFlag){
+                if (g2d != null) {
+                    g2d.drawLine(prevX, prevY, currX, currY);
+                    repaint();
+                    prevX = currX;
+                    prevY = currY;
+                }
             }
-
+            dragCorrectFlag = true;
         }
     }
 

@@ -160,22 +160,7 @@ public class DrawingApp {
         bottomPanel.setMaximumSize(maxBottomSize);
         bottomPanel.add(new Box.Filler(minBottomSize, prefBottomSize, maxBottomSize));
 
-        // set up the drawArea background
-//        Dimension minDrawSize = new Dimension(drawWidth, drawHeight);
-//        Dimension prefDrawSize = new Dimension(drawWidth, drawWidth);
-//        Dimension maxDrawSize = new Dimension(drawWidth, drawHeight);
-//        Box.Filler fillerBox = new Box.Filler(minDrawSize, prefDrawSize, maxDrawSize);
-        
-//        JPanel midPanel = new JPanel();
-//        midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.LINE_AXIS));
-//        midPanel.setOpaque(true);
-//        midPanel.setBackground(Color.GREEN);
-//        midPanel.add(fillerBox);
-        
         if (DEVELOPER_MODE) {
-//        	frame.setResizable(true);
-//            frame.setSize(new Dimension(displayWidth, drawHeight));
-//            content.add(drawArea, BorderLayout.CENTER);
             clearButton.setBackground(Color.white);
             clearButton.setFont(new Font("Arial", Font.PLAIN, 30));
             homeButton.setBackground(Color.white);
@@ -234,7 +219,4 @@ public class DrawingApp {
         
     }
 
-    // private void btnConnectActionPerformed(ActionEvent e) {
-    // serialComm.connect();
-    // }
 }

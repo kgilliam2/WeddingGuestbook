@@ -21,21 +21,21 @@ public class GcodeSender implements Runnable {
     private final int MESSAGE_DELAY = 10;
     private SerialPort serialPort;
     private JLabel statusLabel;
-    private int sentMessages = 0;
-    private int queueLength = 0;
-    private long lastCommandTime = 0;
-    private boolean gcodeEnabled = false;
+    // private int sentMessages = 0;
+    // private int queueLength = 0;
+    // private long lastCommandTime = 0;
+    // private boolean gcodeEnabled = false;
 
-public JLabel getStatusLabel() {
-		return statusLabel;
-	}
+    public JLabel getStatusLabel() {
+        return statusLabel;
+    }
 
-	public void setStatusLabel(JLabel statusLabel) {
-		this.statusLabel = statusLabel;
-	}
+    public void setStatusLabel(JLabel statusLabel) {
+        this.statusLabel = statusLabel;
+    }
 
-	//    
-//    String portStr = 
+    //
+    // String portStr =
     GcodeSender(String name, LinkedList<String> sharedQueue) {
         threadName = name;
         gCodeMessages = sharedQueue;
@@ -46,31 +46,21 @@ public JLabel getStatusLabel() {
         System.out.println("Running " + threadName);
         while (true) {
             try {
-                // queueLength = sentMessages - messageListener.ackedMessages;
-                    // if ( gcodeEnabled ) {
-                        sendGcode();
-                    // }
-                        
-                // }
-                    
-                // do thread stuff
-                // System.out.println("Threading is happening [" + threadName + "]");
+                sendGcode();
             } catch (Exception e) {
                 System.out.println("Thread interrupted.");
                 e.printStackTrace();
             }
         }
-
-        // System.out.println("Exiting thread.");
     }
 
     public boolean initSerialCommunication() {
         String portStr = "/dev/ttyUSB0";
         serialPort = SerialPort.getCommPort(portStr);
-    	// SerialPort ports[] = SerialPort.getCommPorts();
-    	// if (ports.length == 0) return false;
-    	// serialPort = ports[0];
-//        serialPort = SerialPort.getCommPort();
+        // SerialPort ports[] = SerialPort.getCommPorts();
+        // if (ports.length == 0) return false;
+        // serialPort = ports[0];
+        // serialPort = SerialPort.getCommPort();
         serialPort.setComPortParameters(115200, 8, 1, 0);
         // sp.setComPortTimeouts(SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0); // block
         // until bytes can be written
@@ -97,13 +87,13 @@ public JLabel getStatusLabel() {
 
     public void sendGcode() throws InterruptedException, IOException {
         synchronized (gCodeMessages) {
-            while ( gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
+            while (gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
                 gCodeMessages.wait(MESSAGE_DELAY);
             }
             // Thread.sleep(MESSAGE_DELAY);
             String gstr = gCodeMessages.getFirst();
             writeToSerial(gstr);
-            sentMessages++;
+            // sentMessages++;
             gCodeMessages.removeFirst();
             gCodeMessages.notifyAll();
         }
@@ -113,56 +103,60 @@ public JLabel getStatusLabel() {
     public void programGRBL() throws IOException, InterruptedException {
         this.disableGcode();
         GRBL_Setting_Strings GSS_Obj = new GRBL_Setting_Strings();
-        
+
         int num = GSS_Obj.size();
-        for (int ii = 0; ii < num; ++ii){
+        for (int ii = 0; ii < num; ++ii) {
             String str = GSS_Obj.at(ii);
             writeToSerial(str);
             Thread.sleep(100);
         }
         this.enableGcode();
     }
-    
 
     public void query() throws IOException, InterruptedException {
         serialPort.getOutputStream().write('?');
         serialPort.getOutputStream().flush();
         System.out.println("Sent ?");
-        
+
         Thread.sleep(1000);
     }
 
-    public void unlock() throws IOException, InterruptedException  {
-    	writeToSerial("$X");
+    public void unlock() throws IOException, InterruptedException {
+        writeToSerial("$X");
         Thread.sleep(1000);
     }
 
-    public void autoHome() throws IOException, InterruptedException  {
+    public void autoHome() throws IOException, InterruptedException {
         this.enableGcode();
         writeToSerial("$H");
         Thread.sleep(1000);
     }
+
     private void writeToSerial(String str) throws IOException {
-    	for(int ii = 0; ii < str.length(); ++ii) {
-    		 serialPort.getOutputStream().write(str.charAt(ii));
-    	}
-    	serialPort.getOutputStream().write('\n');
+        for (int ii = 0; ii < str.length(); ++ii) {
+            serialPort.getOutputStream().write(str.charAt(ii));
+        }
+        serialPort.getOutputStream().write('\n');
         // serialPort.getOutputStream().flush();
-        
+
         System.out.println("Sent: " + str);
         statusLabel.setText(str);
         messageListener.readyToSend(false);
-        lastCommandTime = System.currentTimeMillis();
+        // lastCommandTime = System.currentTimeMillis();
     }
-    public void disableGcode(){
-        gcodeEnabled = false;
+
+    public void disableGcode() {
+        // gcodeEnabled = false;
     }
-    public void enableGcode(){
-        gcodeEnabled = true;
+
+    public void enableGcode() {
+        // gcodeEnabled = true;
     }
+
     private final class MessageListener implements SerialPortMessageListener {
         private boolean readyFlag = true;
-        private int ackedMessages = 0;
+
+        // private int ackedMessages = 0;
         @Override
         public int getListeningEvents() {
             return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
@@ -193,24 +187,23 @@ public JLabel getStatusLabel() {
                 sb.append(c);
             }
             String msgStr = sb.toString();
-            if (msgStr.contains("ok")){
+            if (msgStr.contains("ok")) {
                 readyToSend(true);
                 // ackedMessages++;
-            }else if (msgStr.contains("error")){
+            } else if (msgStr.contains("error")) {
                 readyToSend(false);
             }
             statusLabel.setText(msgStr);
             return msgStr;
         }
 
-        public boolean readyToSend(){
+        public boolean readyToSend() {
             return readyFlag;
         }
-        public void readyToSend(boolean rdy){
+
+        public void readyToSend(boolean rdy) {
             readyFlag = rdy;
         }
     }
-
-    
 
 }

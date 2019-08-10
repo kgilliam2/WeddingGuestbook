@@ -20,7 +20,7 @@ public class GcodeGenerator implements Runnable{
     private static final float PEN_LIFT_DELAY = (float)0.3; //seconds
     // private static final String JOG_COMMAND_FORMATTER = "$J ="
     private pixelToPaperTransform TX;
-    private final float FEED_RATE = 8000;
+    private final float MAX_FEED_RATE = 8000; //mm per minute
     private JLabel posLabel;
     
     
@@ -31,7 +31,6 @@ public class GcodeGenerator implements Runnable{
         MAX_GCODE_CAPACITY = maxGcodeCapacity;
         TX = new pixelToPaperTransform();
         // System.out.println("Creating " + threadName );
-
     }
 	public pixelToPaperTransform coordinateSystem() {
 		return this.TX;
@@ -45,7 +44,10 @@ public class GcodeGenerator implements Runnable{
                 synchronized(coordinatesQueue){
                     if(coordinatesQueue.CoordinatesAvailable()){
                         
-                        CoordinateMessage msg = coordinatesQueue.getNextCoordinates();
+                        CoordinateMessage msg = coordinatesQueue.popNextCoordinates();
+                        int moveDistance = msg.moveDistance();
+                        float moveTime = moveDistance / MAX_FEED_RATE;
+                        System.out.println("Move Distance: " + moveDistance + "; Move Time: " + moveTime);
                         if(coordinatesQueue.penStateChanged()) {
                             nextGcodeString = generatePenLiftGcode(msg);
                             addGcodeToQueue(nextGcodeString);
@@ -84,7 +86,7 @@ public class GcodeGenerator implements Runnable{
     }
     private String generatePenLiftGcode(CoordinateMessage msg){
         StringBuilder sBuilder = new StringBuilder();
-        float cZ = msg.currentZ();
+        float cZ = msg.getZ();
         sBuilder.append("$J =");
         sBuilder.append(" G90"); //Absolute distances
         // sBuilder.append(" G91"); //Incremental distances
@@ -93,7 +95,7 @@ public class GcodeGenerator implements Runnable{
         sBuilder.append(" Z");
         sBuilder.append(String.format("%.3f", cZ));
         sBuilder.append(" F");
-        sBuilder.append(FEED_RATE/200);
+        sBuilder.append(MAX_FEED_RATE/200);
         // sBuilder.append("\n");
         return sBuilder.toString();
     }
@@ -105,11 +107,11 @@ public class GcodeGenerator implements Runnable{
         return sBuilder.toString();
     }
     private String parseCoordinatesToGcode(CoordinateMessage msg){
-        float cX = TX.transformXCoordinate(msg.currentX());
-        float cY = TX.transformYCoordinate(msg.currentY());
-        float cZ = msg.currentZ();
+        float cX = TX.transformXCoordinate(msg.getX());
+        float cY = TX.transformYCoordinate(msg.getY());
+        float cZ = msg.getZ();
         
-        posLabel.setText("X: " + msg.currentX() + "Y: " + msg.currentY());
+        posLabel.setText("X: " + msg.getX() + "Y: " + msg.getY());
         StringBuilder sBuilder = new StringBuilder();
         //it's in mm
 
@@ -125,9 +127,8 @@ public class GcodeGenerator implements Runnable{
         sBuilder.append(" Z");
         sBuilder.append(String.format("%.3f", cZ));
         sBuilder.append(" F");
-        sBuilder.append(FEED_RATE);
+        sBuilder.append(MAX_FEED_RATE);
         // sBuilder.append("\n");
-        
         return sBuilder.toString();
     }
 
@@ -165,7 +166,10 @@ public class GcodeGenerator implements Runnable{
     	public float mmPerPixelY() {
     		float maxPaperTravel = yMaxPaper - yMinPaper;
     		return maxPaperTravel/numPixelsY;
-    	}
+        }
+        public float mmPerPixel(){
+            return Math.max(this.mmPerPixelX(), this.mmPerPixelY());
+        }
     	public float transformXCoordinate(float xPixelCoordinate) {
     		float xPaperCoordinate = mmPerPixelX()*xPixelCoordinate + xMinPaper;
     		return xPaperCoordinate;
@@ -173,7 +177,11 @@ public class GcodeGenerator implements Runnable{
     	public float transformYCoordinate(float yPixelCoordinate) {
     		float yPaperCoordinate  = mmPerPixelY()*yPixelCoordinate + yMinPaper;
     		return yPaperCoordinate;
-    	}
+        }
+        // public float getMoveDuration(CoordinateMessage msg){
+
+        //     return (float)0.0;
+        // }
     }
 
 }

@@ -21,6 +21,7 @@ public class GcodeSender implements Runnable {
     private final int MESSAGE_DELAY = 10;
     private SerialPort serialPort;
     private JLabel statusLabel;
+    private boolean portOpen = false;
     // private int sentMessages = 0;
     // private int queueLength = 0;
     // private long lastCommandTime = 0;
@@ -67,6 +68,7 @@ public class GcodeSender implements Runnable {
 
         if (serialPort.openPort()) {
             System.out.println("Port is open");
+            portOpen = true;
 
         } else {
             System.out.println("Failed to open port :(");
@@ -79,7 +81,7 @@ public class GcodeSender implements Runnable {
 
     public void start() {
         System.out.println("Starting " + threadName);
-        if (t == null) {
+        if (t == null && portOpen) {
             t = new Thread(this, threadName);
             t.start();
         }

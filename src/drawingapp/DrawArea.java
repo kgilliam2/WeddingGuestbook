@@ -8,7 +8,12 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.BasicStroke;
+
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 // import javax.swing.JLabel;
 
@@ -21,7 +26,7 @@ import drawingapp.CoordinateMessageList;
 public class DrawArea extends JComponent {
 
     private static final long serialVersionUID = 1L;
-    private Image image;
+    private BufferedImage image;
     private Graphics2D g2d;
     private int currX, currY, prevX, prevY, newX, newY;
     private int areaWidth, areaHeight;
@@ -34,7 +39,7 @@ public class DrawArea extends JComponent {
         areaWidth = width;
         areaHeight = height;
 
-        setDoubleBuffered(false);
+        setDoubleBuffered(true);
         addMouseListener(new CustomMouseListener());
         addMouseMotionListener(new CustomMouseMotionListener());
     }
@@ -42,7 +47,8 @@ public class DrawArea extends JComponent {
     protected void paintComponent(Graphics g) {
         if (image == null) {
             // Create image
-            image = createImage(areaWidth, areaHeight);
+            // image = createImage(areaWidth, areaHeight);
+            image = new BufferedImage(areaWidth, areaHeight, BufferedImage.TYPE_INT_RGB);
             g2d = (Graphics2D) image.getGraphics();
             g2d.setStroke(new BasicStroke(3));
             // Enable antialiasing
@@ -76,6 +82,24 @@ public class DrawArea extends JComponent {
 
     public void blue() {
         g2d.setPaint(Color.blue);
+    }
+
+    public void save() throws IOException {
+        // dPanel.paintAll(g2d);
+        if (ImageIO.write(image, "png", new File("./images/output_image.png"))) {
+            System.out.println("-- saved");
+        }
+    }
+
+    public void load() throws IOException {
+        image = ImageIO.read(new File("./images/output_image.png"));
+        // g2d.drawImage(image, null, areaWidth, areaHeight);
+        g2d = (Graphics2D) image.getGraphics();
+        g2d.setStroke(new BasicStroke(3));
+        // Enable antialiasing
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setPaint(Color.black);
+        repaint();
     }
 
     class CustomMouseListener implements MouseListener {
@@ -161,7 +185,7 @@ public class DrawArea extends JComponent {
             setNewX(e.getX());
             setNewY(e.getY());
 
-             penState = PenStates.PEN_DOWN;
+            penState = PenStates.PEN_DOWN;
             addCoordinateMessage();
 
             if (newX >= 0 && newX <= areaWidth) {
@@ -176,7 +200,7 @@ public class DrawArea extends JComponent {
             }
 
             addCoordinateMessage();
-            if(dragCorrectFlag){
+            if (dragCorrectFlag) {
                 if (g2d != null) {
                     g2d.drawLine(prevX, prevY, currX, currY);
                     repaint();

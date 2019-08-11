@@ -47,7 +47,7 @@ public class DrawingApp {
 
     Dimension displaySize = Toolkit.getDefaultToolkit().getScreenSize();
 
-    static LinkedList<String> sharedQueue = new LinkedList<String>();
+    static LinkedList<GcodeMessage> sharedGcodeQueue = new LinkedList<GcodeMessage>();
     static CoordinateMessageList coordsQueue = new CoordinateMessageList();
 
     ActionListener actionListener = new ActionListener() {
@@ -74,8 +74,8 @@ public class DrawingApp {
 
     public static void main(String[] args) {
 
-        gcg = new GcodeGenerator("generator", coordsQueue, sharedQueue, 1000);
-        gcs = new GcodeSender("Sender", sharedQueue);
+        gcg = new GcodeGenerator("generator", coordsQueue, sharedGcodeQueue, 1000);
+        gcs = new GcodeSender("Sender", sharedGcodeQueue);
         gcs.initSerialCommunication();
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -127,12 +127,11 @@ public class DrawingApp {
         drawWidth = displayWidth;
         drawHeight = (int)(displayWidth * heightWidthRatio);
 
-        
-        gcg.coordinateSystem().setPixelLimits(drawWidth, drawHeight);
-        gcg.coordinateSystem().setPaperLimits(
-        		X_MIN_BUFFER_MM, MAX_TRAVEL_X - X_MAX_BUFFER_MM, 
-        		MAX_TRAVEL_Y - Y_MAX_BUFFER_MM, Y_MIN_BUFFER_MM );
-
+        PixelToPaperTransform.setPixelLimits(drawWidth, drawHeight);
+        PixelToPaperTransform.setPaperLimits(
+            X_MIN_BUFFER_MM, MAX_TRAVEL_X - X_MAX_BUFFER_MM, 
+            MAX_TRAVEL_Y - Y_MAX_BUFFER_MM, Y_MIN_BUFFER_MM);
+            
         topHeight = (displayHeight - drawHeight) / 2;
         bottomHeight = displayHeight - drawHeight - topHeight; //topHeight;// - statusLabel.getHeight();
 

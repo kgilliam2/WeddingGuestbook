@@ -8,7 +8,7 @@ public class CoordinateMessage {
     private int X, Y, Z;
     private CoordinateMessage prevMsg;
     private PenStates penState;
-    private float moveTime = 0;
+    
     CoordinateMessage(PenStates penState, int cX, int cY) {
         this.X = cX;
         this.Y = cY;
@@ -30,7 +30,9 @@ public class CoordinateMessage {
     public int getZ() {
         return Z;
     }
-
+    public static int getZ(PenStates ps){
+        return ps == PenStates.PEN_UP ? -1 : 1;
+    }
     public boolean penIsUp() {
         return this.penState == PenStates.PEN_UP;
     }
@@ -62,7 +64,7 @@ public class CoordinateMessage {
             return this.Y;
     }
 
-    public int moveDistance() {
+    public int moveDistancePixels() {
         int dX, dY;
 
         dX = DeltaX();

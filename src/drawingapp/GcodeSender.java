@@ -16,31 +16,33 @@ public class GcodeSender implements Runnable {
     // public class GcodeSender extends Thread{
     private Thread t;
     private String threadName;
-    private LinkedList<String> gCodeMessages = new LinkedList<String>();
+    private LinkedList<GcodeMessage> gCodeMessages = new LinkedList<GcodeMessage>();
     MessageListener messageListener = new MessageListener();
     private final int MESSAGE_DELAY = 10;
     private SerialPort serialPort;
     private JLabel statusLabel;
     private boolean portOpen = false;
+
+    private static final boolean PRINT_GCODE = true;
+    private static final boolean PRINT_ENGLISH = false;
+
     // private int sentMessages = 0;
     // private int queueLength = 0;
     // private long lastCommandTime = 0;
     // private boolean gcodeEnabled = false;
 
-    public JLabel getStatusLabel() {
-        return statusLabel;
-    }
-
-    public void setStatusLabel(JLabel statusLabel) {
-        this.statusLabel = statusLabel;
-    }
-
-    //
-    // String portStr =
-    GcodeSender(String name, LinkedList<String> sharedQueue) {
+    GcodeSender(String name, LinkedList<GcodeMessage> sharedGcodeQueue) {
         threadName = name;
-        gCodeMessages = sharedQueue;
+        gCodeMessages = sharedGcodeQueue;
         // System.out.println("Creating " + threadName );
+    }
+
+    public void start() {
+        System.out.println("Starting " + threadName);
+        if (t == null) {
+            t = new Thread(this, threadName);
+            t.start();
+        }
     }
 
     public void run() {
@@ -55,6 +57,25 @@ public class GcodeSender implements Runnable {
         }
     }
 
+    public void sendGcode() throws InterruptedException, IOException {
+        synchronized (gCodeMessages) {
+            while (gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
+                gCodeMessages.wait(MESSAGE_DELAY);
+            }
+            GcodeMessage gMsg = gCodeMessages.getFirst();
+            String gStr = gMsg.asString();
+            if(portOpen){
+                writeToSerial(gStr);
+                System.out.print("<CONNECTED> " );
+            }
+            if (PRINT_GCODE)
+                System.out.println(gStr);
+            if (PRINT_ENGLISH)
+                gMsg.printMoveInfo();   
+            gCodeMessages.removeFirst();
+            gCodeMessages.notifyAll();
+        }
+    }
     public boolean initSerialCommunication() {
         String portStr = "/dev/ttyUSB0";
         serialPort = SerialPort.getCommPort(portStr);
@@ -77,29 +98,6 @@ public class GcodeSender implements Runnable {
 
         serialPort.addDataListener(messageListener);
         return true;
-    }
-
-    public void start() {
-        System.out.println("Starting " + threadName);
-        if (t == null && portOpen) {
-            t = new Thread(this, threadName);
-            t.start();
-        }
-    }
-
-    public void sendGcode() throws InterruptedException, IOException {
-        synchronized (gCodeMessages) {
-            while (gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
-                gCodeMessages.wait(MESSAGE_DELAY);
-            }
-            // Thread.sleep(MESSAGE_DELAY);
-            String gstr = gCodeMessages.getFirst();
-            writeToSerial(gstr);
-            // sentMessages++;
-            gCodeMessages.removeFirst();
-            gCodeMessages.notifyAll();
-        }
-
     }
 
     public void programGRBL() throws IOException, InterruptedException {
@@ -140,8 +138,6 @@ public class GcodeSender implements Runnable {
         }
         serialPort.getOutputStream().write('\n');
         // serialPort.getOutputStream().flush();
-
-        System.out.println("Sent: " + str);
         statusLabel.setText(str);
         messageListener.readyToSend(false);
         // lastCommandTime = System.currentTimeMillis();
@@ -153,6 +149,14 @@ public class GcodeSender implements Runnable {
 
     public void enableGcode() {
         // gcodeEnabled = true;
+    }
+
+    public JLabel getStatusLabel() {
+        return statusLabel;
+    }
+
+    public void setStatusLabel(JLabel statusLabel) {
+        this.statusLabel = statusLabel;
     }
 
     private final class MessageListener implements SerialPortMessageListener {

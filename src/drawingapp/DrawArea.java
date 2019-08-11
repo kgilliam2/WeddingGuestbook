@@ -58,7 +58,7 @@ public class DrawArea extends JComponent {
         g2d.setPaint(Color.white);
         // Draw a white rectangle which fills entire area
         g2d.fillRect(0, 0, getSize().width, getSize().height);
-        g2d.setPaint(Color.green);
+        g2d.setPaint(Color.black);
         repaint();
     }
 
@@ -71,7 +71,7 @@ public class DrawArea extends JComponent {
     }
 
     public void green() {
-        g2d.setPaint(Color.green);
+        g2d.setPaint(Color.black);
     }
 
     public void blue() {
@@ -161,7 +161,7 @@ public class DrawArea extends JComponent {
             setNewX(e.getX());
             setNewY(e.getY());
 
-            // penState = PenStates.PEN_DOWN;
+             penState = PenStates.PEN_DOWN;
             addCoordinateMessage();
 
             if (newX >= 0 && newX <= areaWidth) {

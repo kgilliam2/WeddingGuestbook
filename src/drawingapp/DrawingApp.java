@@ -31,7 +31,7 @@ import drawingapp.CoordinateMessageList;
 public class DrawingApp {
     // boolean flag = false;
     public static final boolean DEVELOPER_MODE = true;
-    public static final float Y_MIN_BUFFER_MM = 10;
+    public static final float Y_MIN_BUFFER_MM = 0;
     public static final float Y_MAX_BUFFER_MM = 10;
     public static final float X_MIN_BUFFER_MM = 5;
     public static final float X_MAX_BUFFER_MM = 5;

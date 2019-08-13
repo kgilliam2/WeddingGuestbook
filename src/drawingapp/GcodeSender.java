@@ -24,12 +24,7 @@ public class GcodeSender implements Runnable {
     private boolean portOpen = false;
 
     private static final boolean PRINT_GCODE = true;
-    private static final boolean PRINT_ENGLISH = false;
-
-    // private int sentMessages = 0;
-    // private int queueLength = 0;
-    // private long lastCommandTime = 0;
-    // private boolean gcodeEnabled = false;
+    private static final boolean PRINT_ENGLISH = false; 
 
     GcodeSender(String name, LinkedList<GcodeMessage> sharedGcodeQueue) {
         threadName = name;

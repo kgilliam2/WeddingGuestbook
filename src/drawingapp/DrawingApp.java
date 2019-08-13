@@ -38,7 +38,7 @@ public class DrawingApp {
     public static final float MAX_TRAVEL_X = 800;
     public static final float MAX_TRAVEL_Y = 300;
     public static GcodeGenerator gcg;
-    public static GcodeSender gcs;
+    public static XbeeGCodeSender gcs;
 
     DrawArea drawArea;
     Button loadButton = new Button("LOAD");
@@ -65,8 +65,9 @@ public class DrawingApp {
                 }
             } else if (e.getSource() == progButton) {
                 try {
-                    gcs.programGRBL();
-                } catch (IOException | InterruptedException e1) {
+                    // gcs.programGRBL();
+                    int i = 1;
+                } catch (Exception e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
@@ -92,8 +93,8 @@ public class DrawingApp {
     public static void main(String[] args) {
 
         gcg = new GcodeGenerator("generator", coordsQueue, sharedGcodeQueue, 1000);
-        gcs = new GcodeSender("Sender", sharedGcodeQueue);
-        gcs.initSerialCommunication();
+        gcs = new XbeeGCodeSender("Sender", sharedGcodeQueue);
+        gcs.openXbeeComs();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

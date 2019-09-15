@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="src/" kind="src" path=""/>
-	<classpathentry exported="true" kind="lib" path="lib/jSerialComm-2.5.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xbee-java-library-1.3.0.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

@@ -1,4 +1,4 @@
-package app;
+package main.java.app;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -26,7 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.util.LinkedList;
-import app.CoordinateMessageList;
+import main.java.app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;

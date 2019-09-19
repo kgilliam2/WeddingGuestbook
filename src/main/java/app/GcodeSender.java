@@ -1,4 +1,4 @@
-package app;
+package main.java.app;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -77,12 +77,12 @@ public class GcodeSender implements Runnable {
         }
     }
     public boolean initSerialCommunication() {
-        String portStr = "/dev/ttyUSB0";
-        serialPort = SerialPort.getCommPort(portStr);
-        // SerialPort ports[] = SerialPort.getCommPorts();
-        // if (ports.length == 0) return false;
-        // serialPort = ports[0];
-        // serialPort = SerialPort.getCommPort();
+        // String portStr = "/dev/ttyUSB0";
+        // serialPort = SerialPort.getCommPort(portStr);
+        SerialPort ports[] = SerialPort.getCommPorts();
+        if (ports.length == 0) return false;
+        serialPort = ports[0];
+
         serialPort.setComPortParameters(115200, 8, 1, 0);
         // sp.setComPortTimeouts(SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0); // block
         // until bytes can be written

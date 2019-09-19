@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="app.AppTest" time="0.032" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="test.java.app.AppTest" time="0.063" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="sun.desktop" value="gnome"/>
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit"/>
     <property name="java.specification.version" value="11"/>
     <property name="sun.cpu.isalist" value=""/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
-    <property name="java.class.path" value="/home/kevin/vs-code-workspace/DA_2/DrawingApp/target/test-classes:/home/kevin/vs-code-workspace/DA_2/DrawingApp/target/classes:/home/kevin/.m2/repository/junit/junit/4.11/junit-4.11.jar:/home/kevin/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/kevin/.m2/repository/com/fazecast/jSerialComm/2.5.2/jSerialComm-2.5.2.jar:"/>
+    <property name="java.class.path" value="/home/kevin/vs-code-workspace/DrawingApp/target/test-classes:/home/kevin/vs-code-workspace/DrawingApp/target/classes:/home/kevin/.m2/repository/junit/junit/4.11/junit-4.11.jar:/home/kevin/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/kevin/.m2/repository/com/fazecast/jSerialComm/2.5.2/jSerialComm-2.5.2.jar:"/>
     <property name="java.vm.vendor" value="Ubuntu"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="java.vendor.url" value="https://ubuntu.com/"/>
@@ -16,9 +16,9 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-11-openjdk-amd64/lib"/>
-    <property name="sun.java.command" value="/home/kevin/vs-code-workspace/DA_2/DrawingApp/target/surefire/surefirebooter17838893798087655693.jar /home/kevin/vs-code-workspace/DA_2/DrawingApp/target/surefire 2019-09-14T18-47-43_123-jvmRun1 surefire943037305411708522tmp surefire_05606022643114881211tmp"/>
+    <property name="sun.java.command" value="/home/kevin/vs-code-workspace/DrawingApp/target/surefire/surefirebooter2795208679334716296.jar /home/kevin/vs-code-workspace/DrawingApp/target/surefire 2019-09-15T12-10-50_249-jvmRun1 surefire5403363214652893989tmp surefire_014927656609641169701tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="surefire.test.class.path" value="/home/kevin/vs-code-workspace/DA_2/DrawingApp/target/test-classes:/home/kevin/vs-code-workspace/DA_2/DrawingApp/target/classes:/home/kevin/.m2/repository/junit/junit/4.11/junit-4.11.jar:/home/kevin/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/kevin/.m2/repository/com/fazecast/jSerialComm/2.5.2/jSerialComm-2.5.2.jar:"/>
+    <property name="surefire.test.class.path" value="/home/kevin/vs-code-workspace/DrawingApp/target/test-classes:/home/kevin/vs-code-workspace/DrawingApp/target/classes:/home/kevin/.m2/repository/junit/junit/4.11/junit-4.11.jar:/home/kevin/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/kevin/.m2/repository/com/fazecast/jSerialComm/2.5.2/jSerialComm-2.5.2.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
     <property name="user.home" value="/home/kevin"/>
     <property name="user.language" value="en"/>
@@ -26,13 +26,13 @@
     <property name="java.version.date" value="2019-07-16"/>
     <property name="java.home" value="/usr/lib/jvm/java-11-openjdk-amd64"/>
     <property name="file.separator" value="/"/>
-    <property name="basedir" value="/home/kevin/vs-code-workspace/DA_2/DrawingApp"/>
+    <property name="basedir" value="/home/kevin/vs-code-workspace/DrawingApp"/>
     <property name="java.vm.compressedOopsMode" value="32-bit"/>
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/>
-    <property name="surefire.real.class.path" value="/home/kevin/vs-code-workspace/DA_2/DrawingApp/target/surefire/surefirebooter17838893798087655693.jar"/>
+    <property name="surefire.real.class.path" value="/home/kevin/vs-code-workspace/DrawingApp/target/surefire/surefirebooter2795208679334716296.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="11.0.4+11-post-Ubuntu-1ubuntu219.04"/>
     <property name="user.name" value="kevin"/>
@@ -45,7 +45,7 @@
     <property name="java.vendor.url.bug" value="https://bugs.launchpad.net/ubuntu/+source/openjdk-lts"/>
     <property name="java.io.tmpdir" value="/tmp"/>
     <property name="java.version" value="11.0.4"/>
-    <property name="user.dir" value="/home/kevin/vs-code-workspace/DA_2/DrawingApp"/>
+    <property name="user.dir" value="/home/kevin/vs-code-workspace/DrawingApp"/>
     <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/>
@@ -57,5 +57,5 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="55.0"/>
   </properties>
-  <testcase name="shouldAnswerWithTrue" classname="app.AppTest" time="0.002"/>
+  <testcase name="shouldAnswerWithTrue" classname="test.java.app.AppTest" time="0.002"/>
 </testsuite>

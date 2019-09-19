@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -30,7 +31,7 @@ import main.java.app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = true;
+    public static final boolean DEVELOPER_MODE = false;
     public static final float Y_MIN_BUFFER_MM = 0;
     public static final float Y_MAX_BUFFER_MM = 10;
     public static final float X_MIN_BUFFER_MM = 5;
@@ -55,6 +56,12 @@ public class DrawingApp {
     ActionListener actionListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == clearButton) {
+                try {
+                    drawArea.save();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
                 drawArea.clear();
             } else if (e.getSource() == homeButton) {
                 // btnConnectActionPerformed(e);
@@ -77,8 +84,7 @@ public class DrawingApp {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-            }
-            else if (e.getSource() == loadButton) {
+            } else if (e.getSource() == loadButton) {
                 try {
                     drawArea.load();
                 } catch (IOException e1) {
@@ -130,12 +136,32 @@ public class DrawingApp {
 
         JLabel statusLabel = new JLabel();
         JLabel posLabel = new JLabel();
+        JLabel welcomeLabel = new JLabel();
+        JLabel step1_Label = new JLabel();
+        JLabel step2_Label = new JLabel();
+        JPanel stepsPanel = new JPanel();
 
         gcs.setStatusLabel(statusLabel);
         gcg.setPosLabel(posLabel);
 
         statusLabel.setFont(new Font("Courier", Font.PLAIN, 20));
-        statusLabel.setForeground(Color.white);
+        statusLabel.setForeground(Color.GRAY);
+
+        welcomeLabel.setFont(new Font("Didot", Font.PLAIN, 110));
+        welcomeLabel.setForeground(Color.white);
+        welcomeLabel.setText("Welcome!");
+        step1_Label.setFont(new Font("Didot", Font.BOLD, 70));
+        step1_Label.setForeground(Color.white);
+        step1_Label.setText("Please sign in here, then pull some paper through for the next person.");
+        step2_Label.setFont(new Font("Didot", Font.BOLD, 70));
+        step2_Label.setForeground(Color.white);
+        step2_Label.setText("Press \"Clear\" to clean the slate!");
+
+        stepsPanel.setLayout(new BoxLayout(stepsPanel, BoxLayout.PAGE_AXIS));
+        stepsPanel.setBackground(Color.BLACK);
+        stepsPanel.add(step1_Label);
+        stepsPanel.add(step2_Label);
+        stepsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
         displayWidth = (int) displaySize.getWidth();
         displayHeight = (int) displaySize.getHeight();
@@ -162,6 +188,7 @@ public class DrawingApp {
         Dimension maxTopSize = new Dimension(displayWidth, topHeight);
         topPanel.setBackground(Color.BLACK);
         topPanel.setMaximumSize(maxTopSize);
+        topPanel.add(welcomeLabel);
         topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
 
         // Set up bottom panel
@@ -179,8 +206,7 @@ public class DrawingApp {
             loadButton.setFont(new Font("Arial", Font.PLAIN, 30));
             saveButton.setBackground(Color.white);
             saveButton.setFont(new Font("Arial", Font.PLAIN, 30));
-            clearButton.setBackground(Color.white);
-            clearButton.setFont(new Font("Arial", Font.PLAIN, 30));
+
             homeButton.setBackground(Color.white);
             homeButton.setFont(new Font("Arial", Font.PLAIN, 30));
             progButton.setBackground(Color.white);
@@ -188,17 +214,12 @@ public class DrawingApp {
 
             topPanel.add(loadButton);
             topPanel.add(saveButton);
-            topPanel.add(clearButton);
             topPanel.add(homeButton);
             topPanel.add(progButton);
 
-            bottomPanel.add(posLabel, BorderLayout.LINE_END);
-            posLabel.setText("Pen Position");
-            posLabel.setForeground(Color.white);
-
-            statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
-            statusLabel.setText("Status Text");
-            bottomPanel.add(statusLabel, BorderLayout.LINE_START);
+            // bottomPanel.add(posLabel, BorderLayout.LINE_END);
+            // posLabel.setText("Pen Position");
+            // posLabel.setForeground(Color.white);
         } else {
 
             // frame.setUndecorated(true);
@@ -221,7 +242,16 @@ public class DrawingApp {
             // frame.setAlwaysOnTop(false);
             // }
             // });
+
         }
+        statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
+        statusLabel.setText("Status Text");
+        stepsPanel.add(statusLabel);
+        // bottomPanel.add(statusLabel, BorderLayout.LINE_START);
+        bottomPanel.add(stepsPanel, BorderLayout.LINE_START);
+        clearButton.setBackground(Color.white);
+        clearButton.setFont(new Font("Arial", Font.PLAIN, 30));
+        bottomPanel.add(clearButton, BorderLayout.LINE_END);
         frame.setUndecorated(true);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setState(JFrame.MAXIMIZED_BOTH);

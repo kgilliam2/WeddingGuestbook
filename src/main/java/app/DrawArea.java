@@ -33,7 +33,7 @@ public class DrawArea extends JComponent {
     CoordinateMessageList coordsQueue;
     private PenStates penState = PenStates.PEN_UP;
     private boolean dragCorrectFlag = false;
-
+    private int saveCount = 0;
     public DrawArea(CoordinateMessageList sharedQueue, int width, int height) {
         coordsQueue = sharedQueue;
         areaWidth = width;
@@ -86,13 +86,15 @@ public class DrawArea extends JComponent {
 
     public void save() throws IOException {
         // dPanel.paintAll(g2d);
-        if (ImageIO.write(image, "png", new File("./images/output_image.png"))) {
+        saveCount++;
+        if (ImageIO.write(image, "png", 
+                new File("./images/output_image" + saveCount + ".png"))) {
             System.out.println("-- saved");
         }
     }
 
     public void load() throws IOException {
-        image = ImageIO.read(new File("./images/output_image.png"));
+        image = ImageIO.read(new File("./images/output_image." + saveCount + "png"));
         // g2d.drawImage(image, null, areaWidth, areaHeight);
         g2d = (Graphics2D) image.getGraphics();
         g2d.setStroke(new BasicStroke(3));

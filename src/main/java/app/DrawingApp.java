@@ -1,7 +1,6 @@
 package main.java.app;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -17,21 +16,21 @@ import java.awt.event.ActionListener;
 // import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 // import javax.swing.FullScreenFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
 import java.util.LinkedList;
 import main.java.app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = true;
+    public static final boolean DEVELOPER_MODE = false;
     public static final boolean WAIT_FOR_CONNECT = false;
     public static final float Y_MIN_BUFFER_MM = 0;
     public static final float Y_MAX_BUFFER_MM = 10;
@@ -41,14 +40,21 @@ public class DrawingApp {
     public static final float MAX_TRAVEL_Y = 300;
     public static GcodeGenerator gcg;
     public static GcodeSender gcs;
+    public long lastPressTime = 0;
+    public long newPressTime = 0;
+    public int exitPressCount = 0;
+    JFrame frame = new JFrame("App Title");
+    JPanel topPanel = new JPanel();
+    JPanel bottomPanel = new JPanel();
+    JPanel buttonsPanel = new JPanel();
 
     DrawArea drawArea;
-    Button loadButton = new Button("LOAD");
-    Button saveButton = new Button("SAVE");
-    Button clearButton = new Button("CLEAR");
-    Button homeButton = new Button("HOME");
-    Button progButton = new Button("PROGRAM");
-    Button exitButton = new Button("EXITTTAHHH");
+    JButton loadButton = new JButton("LOAD");
+    JButton saveButton = new JButton("SAVE");
+    JButton clearButton = new JButton("CLEAR");
+    JButton homeButton = new JButton("HOME");
+    JButton progButton = new JButton("PROGRAM");
+    JButton exitButton = new JButton("EXIT");
 
     Dimension displaySize = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -94,6 +100,24 @@ public class DrawingApp {
                     e1.printStackTrace();
                 }
             }
+            else if (e.getSource() == exitButton) {
+                lastPressTime = newPressTime;
+                newPressTime = System.nanoTime();
+                long elapsed_millis = (newPressTime - lastPressTime)/1000000;
+                if (elapsed_millis < 500) {
+                    exitPressCount++;
+                }
+                else{
+                    exitPressCount = 0;
+                    hideDebugButtons();
+                }
+                if(exitPressCount > 10){
+                    System.exit(0);
+                } else if (exitPressCount == 5){
+                    showDebugButtons();
+                }
+                // System.out.println(exitPressCount);
+            }
         }
     };
 
@@ -110,6 +134,8 @@ public class DrawingApp {
             public void run() {
                 DrawingApp app = new DrawingApp();
                 app.setupGUI();
+                // toc = System.nanoTime() / 1000000;
+                // while ((toc - tic) > 5000) {toc = System.nanoTime() / 1000000;}
                 // statusLabel.setText(gcg.getNextGcodeString());
             }
         });
@@ -130,12 +156,10 @@ public class DrawingApp {
     private void setupGUI() {
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = env.getDefaultScreenDevice();
-        JFrame frame = new JFrame("App Title");
-        JPanel topPanel = new JPanel();
-        JPanel bottomPanel = new JPanel();
+
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
-        JPanel buttonsPanel = new JPanel();
+
 
         JLabel statusLabel = new JLabel();
         JLabel posLabel = new JLabel();
@@ -193,16 +217,6 @@ public class DrawingApp {
         topPanel.setMaximumSize(maxTopSize);
         topPanel.add(welcomeLabel);
         topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
-
-        // Set up the Buttons panel
-        buttonsPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
-        Dimension minButtonsSize = new Dimension(0, 0);
-        Dimension prefButtonsSize = new Dimension(displayWidth, topHeight);
-        Dimension maxButtonsSize = new Dimension(displayWidth, topHeight);
-        buttonsPanel.setBackground(Color.BLACK);
-        buttonsPanel.setMaximumSize(maxTopSize);
-        buttonsPanel.add(welcomeLabel);
-        buttonsPanel.add(new Box.Filler(minButtonsSize, prefButtonsSize, maxButtonsSize));
         
         // Set up bottom panel
         Dimension minBottomSize = new Dimension(0, 0);
@@ -214,62 +228,65 @@ public class DrawingApp {
         bottomPanel.setMaximumSize(maxBottomSize);
         bottomPanel.add(new Box.Filler(minBottomSize, prefBottomSize, maxBottomSize));
 
+        // Set up the Buttons panel
+        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.LINE_AXIS));
+        // buttonsPanel.setLayout(new FlowLayout());
+        // Dimension minButtonsSize = new Dimension(0, 0);
+        // Dimension prefButtonsSize = new Dimension(displayWidth, topHeight);
+        // Dimension maxButtonsSize = new Dimension(displayWidth, topHeight);
+        buttonsPanel.setBackground(Color.BLACK);
+        // buttonsPanel.setMaximumSize(maxButtonsSize);
+        // buttonsPanel.add(new Box.Filler(minButtonsSize, prefButtonsSize, maxButtonsSize));
+         // buttonsPanel.add
+         loadButton.setBackground(Color.white);
+         loadButton.setFont(new Font("Arial", Font.PLAIN, 30));
+         loadButton.setVisible(false);
+         saveButton.setBackground(Color.white);
+         saveButton.setFont(new Font("Arial", Font.PLAIN, 30));
+         saveButton.setVisible(false);
+         homeButton.setBackground(Color.white);
+         homeButton.setFont(new Font("Arial", Font.PLAIN, 30));
+         homeButton.setVisible(false);
+         progButton.setBackground(Color.white);
+         progButton.setFont(new Font("Arial", Font.PLAIN, 30));
+         progButton.setVisible(false);
+         topPanel.add(loadButton);
+         topPanel.add(saveButton);
+         topPanel.add(homeButton);
+         topPanel.add(progButton);
+         // frame.setUndecorated(true);
+         // Transparent 16 x 16 pixel cursor image.
+         BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+         // Create a new blank cursor.
+         Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0),
+                 "blank cursor");
+         // Set the blank cursor to the JFrame.
+         content.setCursor(blankCursor);
         if (DEVELOPER_MODE) {
-            loadButton.setBackground(Color.white);
-            loadButton.setFont(new Font("Arial", Font.PLAIN, 30));
-            saveButton.setBackground(Color.white);
-            saveButton.setFont(new Font("Arial", Font.PLAIN, 30));
+            showDebugButtons();
+        } 
 
-            homeButton.setBackground(Color.white);
-            homeButton.setFont(new Font("Arial", Font.PLAIN, 30));
-            progButton.setBackground(Color.white);
-            progButton.setFont(new Font("Arial", Font.PLAIN, 30));
-
-            topPanel.add(loadButton);
-            topPanel.add(saveButton);
-            topPanel.add(homeButton);
-            topPanel.add(progButton);
-
-            // bottomPanel.add(posLabel, BorderLayout.LINE_END);
-            // posLabel.setText("Pen Position");
-            // posLabel.setForeground(Color.white);
-        } else {
-
-            // frame.setUndecorated(true);
-            // Transparent 16 x 16 pixel cursor image.
-            BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-            // Create a new blank cursor.
-            Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0),
-                    "blank cursor");
-            // Set the blank cursor to the JFrame.
-            content.setCursor(blankCursor);
-            // frame.addFocusListener(new FocusListener() {
-            //
-            // @Override
-            // public void focusGained(FocusEvent arg0) {
-            // frame.setAlwaysOnTop(true);
-            // }
-            //
-            // @Override
-            // public void focusLost(FocusEvent arg0) {
-            // frame.setAlwaysOnTop(false);
-            // }
-            // });
-
-        }
         statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
         statusLabel.setText("Status Text");
         // stepsPanel.add(statusLabel);
         bottomPanel.add(statusLabel, BorderLayout.LINE_START);
         // bottomPanel.add(stepsPanel, BorderLayout.LINE_START);
-        buttonsPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
-
-        // buttonsPanel.add
+        // Border emptyBorder = BorderFactory.createEmptyBorder();
         clearButton.setBackground(Color.BLACK);
         clearButton.setForeground(Color.WHITE);
-        clearButton.setFont(new Font("Didot", Font.PLAIN, 50));
-        buttonsPanel.add(exitButton);
+        // clearButton.setBorderPainted(false);
+        clearButton.setFocusPainted(false);
+        clearButton.setFont(new Font("Didot", Font.PLAIN, 70));
+        // clearButton.setPreferredSize(new Dimension(800, 300));
         buttonsPanel.add(clearButton);
+        exitButton.setFont(new Font("Didot", Font.PLAIN, 50));
+        exitButton.setBorderPainted(false);
+        exitButton.setBackground(Color.BLACK);
+        exitButton.setForeground(Color.BLACK);
+        exitButton.setFocusPainted(false);
+        buttonsPanel.add(Box.createRigidArea(new Dimension(0,5)));
+        buttonsPanel.add(exitButton);
+        buttonsPanel.add(Box.createRigidArea(new Dimension(0,5)));
         
         bottomPanel.add(buttonsPanel, BorderLayout.LINE_END);
         frame.setUndecorated(true);
@@ -288,8 +305,29 @@ public class DrawingApp {
         clearButton.addActionListener(actionListener);
         homeButton.addActionListener(actionListener);
         progButton.addActionListener(actionListener);
+        exitButton.addActionListener(actionListener);
         frame.setVisible(true);
-
     }
-
+    private void showDebugButtons(){
+        loadButton.setVisible(true);
+        loadButton.setEnabled(true);
+        saveButton.setVisible(true);
+        saveButton.setEnabled(true);
+        homeButton.setVisible(true);
+        homeButton.setEnabled(true);
+        progButton.setVisible(true);
+        progButton.setEnabled(true);
+        // frame.setVisible(true);
+    }
+    private void hideDebugButtons(){
+        loadButton.setVisible(false);
+        loadButton.setEnabled(false);
+        saveButton.setVisible(false);
+        saveButton.setEnabled(false);
+        homeButton.setVisible(false);
+        homeButton.setEnabled(false);
+        progButton.setVisible(false);
+        progButton.setEnabled(false);
+        // frame.setVisible(true);
+    }
 }

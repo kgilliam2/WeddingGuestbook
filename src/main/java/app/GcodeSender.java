@@ -18,21 +18,24 @@ public class GcodeSender implements Runnable {
     private String threadName;
     private LinkedList<GcodeMessage> gCodeMessages = new LinkedList<GcodeMessage>();
     MessageListener messageListener = new MessageListener();
-    private final int MESSAGE_DELAY = 10;
+    private final int MESSAGE_DELAY = 20;
     private SerialPort serialPort;
     private JLabel statusLabel;
     private boolean portOpen = false;
     public boolean grblResponded;
     public int reconnectCount = 0;
-    public int noOkayCount = 0;
+
     private static final boolean PRINT_GCODE = true;
     private static final boolean PRINT_ENGLISH = false;
-    private boolean connectionMadeFlag = false;
+
+    // private long tic, toc;
     // private int sentMessages = 0;
     // private int queueLength = 0;
-    // private long lastCommandTime = 0;
-    // private boolean gcodeEnabled = false;
+    private long lastCommandTime = 0;
+    private long currentTime = 0;
+    private boolean homed = false;
 
+    // private boolean discoFlag = true;
     GcodeSender(String name, LinkedList<GcodeMessage> sharedGcodeQueue) {
         threadName = name;
         gCodeMessages = sharedGcodeQueue;
@@ -41,6 +44,7 @@ public class GcodeSender implements Runnable {
 
     public void start() {
         System.out.println("Starting " + threadName);
+
         if (t == null) {
             t = new Thread(this, threadName);
             t.start();
@@ -48,54 +52,87 @@ public class GcodeSender implements Runnable {
     }
 
     public void run() {
-        
+
         // System.out.println("Running " + threadName);
         // try {
-        //     this.autoHome();
+        // this.autoHome();
         // } catch (IOException | NullPointerException e1) {
-        //     portOpen = false;
-        //     System.out.println("No Connection. Entering reconnect loop...");
-        //     while(!this.AttemptReconnect());
+        // portOpen = false;
+        // System.out.println("No Connection. Entering reconnect loop...");
+        // while(!this.AttemptReconnect());
         // } catch (InterruptedException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
         // }
+        lastCommandTime = System.nanoTime() / 1000000;
 
         while (true) {
             try {
-                if (!this.portOpen){
-                    connectionMadeFlag = this.initSerialCommunication();
-                }
-                else if(connectionMadeFlag){
+                if (!this.portOpen) {
+                    // statusLabel.setText("Connecting to Guest Book...");
+                    this.initSerialCommunication();
                     this.autoHome();
-                    connectionMadeFlag = false;
-                }
-                else
+                } else if (messageListener.getConnectionMadeFlag()) {
+                    this.autoHome();
+                    // this.query();
+                    messageListener.clearConnectionMadeFlag();
+                } else
                     sendGcode();
             } catch (InterruptedException e) {
                 System.out.println("Thread interrupted.");
                 e.printStackTrace();
-            }catch( IOException | NullPointerException  e) {
+            } catch (IOException | DisconnectedException | NullPointerException e) {
+                if (this.portOpen)
+                    serialPort.closePort();
+                    e.printStackTrace();
                 System.out.println("No Connection. Entering reconnect loop...");
-                statusLabel.setText("Attempting to reconnect to Guest Book...");
-                while(!this.AttemptReconnect());
-                connectionMadeFlag = true;
-            } 
+                while (!this.AttemptReconnect()) {}
+            }
         }
     }
 
-    public void sendGcode() throws InterruptedException, IOException, NullPointerException{
+    public void sendGcode() throws InterruptedException, IOException, NullPointerException, DisconnectedException {
         synchronized (gCodeMessages) {
             // if(){
-            // noOkayCount++;
+
             // }
-            while (gCodeMessages.isEmpty() || !messageListener.readyToSend()) {
+            if (gCodeMessages.isEmpty()) {
                 gCodeMessages.wait(MESSAGE_DELAY);
+                return;
             }
+            if (!messageListener.readyToSend()) {
+                messageListener.incrementNoOkayCount();
+                gCodeMessages.wait(MESSAGE_DELAY);
+                if (messageListener.getNoOkayCount() > 200) {
+                    messageListener.resetNoOkayCount();
+                    throw new DisconnectedException();
+                }
+                return;
+            }
+            // currentTime = System.nanoTime() / 1000000;
+            // if (!homed) {
+            // if ((currentTime - lastCommandTime) > 20000) {
+            // // statusLabel.setText("!homed");
+            // autoHome();
+            // return;
+            // }
+            // } else {
+            // if ((currentTime - lastCommandTime) > 600000) {
+            // // statusLabel.setText("homed wtf");
+            // autoHome();
+            // return;
+            // }
+            // }
+            if (messageListener.getConnectionMadeFlag()) {
+                autoHome();
+                return;
+            }
+
             GcodeMessage gMsg = gCodeMessages.getFirst();
             String gStr = gMsg.asString();
             if (portOpen) {
                 writeToSerial(gStr);
+                homed = false;
                 System.out.print("<CONNECTED> ");
             }
             if (PRINT_GCODE)
@@ -112,17 +149,29 @@ public class GcodeSender implements Runnable {
 
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException e) {
+            statusLabel.setText("Attempting to reconnect to Guest Book...");
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         System.out.println("Reconnect Attempt #" + reconnectCount);
+        statusLabel.setText("Reconnect Attempt #" + reconnectCount);
         boolean result = initSerialCommunication();
-        if (result == true){
+        if (result == true) {
             reconnectCount = 0;
+            messageListener.setConnectionMadeFlag();
+            try {
+                Thread.sleep(1000);
+                statusLabel.setText("Connected!");
+
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         return result;
     }
+
     public boolean initSerialCommunication() {
         SerialPort ports[] = SerialPort.getCommPorts();
         if (ports.length == 0)
@@ -163,7 +212,8 @@ public class GcodeSender implements Runnable {
         serialPort.getOutputStream().write('?');
         serialPort.getOutputStream().flush();
         System.out.println("Sent ?");
-
+        lastCommandTime = System.nanoTime() / 1000000;
+        homed = true;
         Thread.sleep(1000);
     }
 
@@ -175,6 +225,7 @@ public class GcodeSender implements Runnable {
     public void autoHome() throws IOException, InterruptedException, NullPointerException {
         this.enableGcode();
         writeToSerial("$H");
+        homed = true;
         Thread.sleep(1000);
     }
 
@@ -187,6 +238,7 @@ public class GcodeSender implements Runnable {
         statusLabel.setText(str);
         messageListener.readyToSend(false);
         // lastCommandTime = System.currentTimeMillis();
+        lastCommandTime = System.nanoTime() / 1000000;
     }
 
     public void disableGcode() {
@@ -207,12 +259,36 @@ public class GcodeSender implements Runnable {
 
     private final class MessageListener implements SerialPortMessageListener {
         private boolean readyFlag = true;
+        private boolean connectionMadeFlag = false;
+        private int noOkayCount = 0;
 
         // private boolean grblResponded = false;
         // private int ackedMessages = 0;
         @Override
         public int getListeningEvents() {
             return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+        }
+        public void resetNoOkayCount(){
+            this.noOkayCount = 0;
+        }
+        public int getNoOkayCount() {
+            return noOkayCount;
+        }
+
+        public void incrementNoOkayCount() {
+            this.noOkayCount++;
+        }
+
+        public boolean getConnectionMadeFlag() {
+            return connectionMadeFlag;
+        }
+
+        public void setConnectionMadeFlag() {
+            this.connectionMadeFlag = true;
+        }
+
+        public void clearConnectionMadeFlag() {
+            this.connectionMadeFlag = false;
         }
 
         @Override
@@ -229,7 +305,8 @@ public class GcodeSender implements Runnable {
         @Override
         public void serialEvent(SerialPortEvent event) {
             byte[] delimitedMessage = event.getReceivedData();
-            System.out.println("Received: " + parseMessage(delimitedMessage));
+            String msg = parseMessage(delimitedMessage);
+            System.out.println("Received: " + msg);
         }
 
         String parseMessage(byte[] msg) {
@@ -242,13 +319,14 @@ public class GcodeSender implements Runnable {
             String msgStr = sb.toString();
             if (msgStr.contains("ok")) {
                 readyToSend(true);
-                // ackedMessages++;
+                resetNoOkayCount();
             } else if (msgStr.contains("error")) {
                 readyToSend(false);
             } else if (msgStr.contains("[MSG:'$H'|'$X' to unlock]")) {
                 grblResponded = true;
+                connectionMadeFlag = true;
             }
-            statusLabel.setText(msgStr);
+            // statusLabel.setText(msgStr);
             return msgStr;
         }
 
@@ -260,10 +338,12 @@ public class GcodeSender implements Runnable {
             readyFlag = rdy;
         }
     }
-    // public class DisconnectedException extends Exception { 
-    //     public DisconnectedException(){};
-    //     public DisconnectedException(String errorMessage) {
-    //         super(errorMessage);
-    //     }
-    // }
+    public class DisconnectedException extends Exception {
+    public DisconnectedException(){
+        super ("You've been disconnected.");
+    };
+    public DisconnectedException(String errorMessage) {
+    super(errorMessage);
+    }
+    }
 }

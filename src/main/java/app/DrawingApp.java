@@ -31,7 +31,8 @@ import main.java.app.CoordinateMessageList;
 
 public class DrawingApp {
     // boolean flag = false;
-    public static final boolean DEVELOPER_MODE = false;
+    public static final boolean DEVELOPER_MODE = true;
+    public static final boolean WAIT_FOR_CONNECT = false;
     public static final float Y_MIN_BUFFER_MM = 0;
     public static final float Y_MAX_BUFFER_MM = 10;
     public static final float X_MIN_BUFFER_MM = 5;
@@ -47,6 +48,7 @@ public class DrawingApp {
     Button clearButton = new Button("CLEAR");
     Button homeButton = new Button("HOME");
     Button progButton = new Button("PROGRAM");
+    Button exitButton = new Button("EXITTTAHHH");
 
     Dimension displaySize = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -99,7 +101,10 @@ public class DrawingApp {
 
         gcg = new GcodeGenerator("generator", coordsQueue, sharedGcodeQueue, 1000);
         gcs = new GcodeSender("Sender", sharedGcodeQueue);
-        gcs.initSerialCommunication();
+        // if (WAIT_FOR_CONNECT)
+        //     while(!gcs.initSerialCommunication() );
+        // else
+        //     gcs.initSerialCommunication();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -111,18 +116,15 @@ public class DrawingApp {
         gcg.start();
         gcs.start();
 
-        if (!DEVELOPER_MODE) {
-            try {
-                Thread.sleep(3000);
-                gcs.autoHome();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+        // if (!DEVELOPER_MODE) {
+        //     try {
+        //         Thread.sleep(3000);
+
+        //     } catch (InterruptedException e) {
+        //         // TODO Auto-generated catch block
+        //         e.printStackTrace();
+        //     } 
+        // }
     }
 
     private void setupGUI() {
@@ -133,13 +135,14 @@ public class DrawingApp {
         JPanel bottomPanel = new JPanel();
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
+        JPanel buttonsPanel = new JPanel();
 
         JLabel statusLabel = new JLabel();
         JLabel posLabel = new JLabel();
         JLabel welcomeLabel = new JLabel();
-        JLabel step1_Label = new JLabel();
-        JLabel step2_Label = new JLabel();
-        JPanel stepsPanel = new JPanel();
+        // JLabel step1_Label = new JLabel();
+        // JLabel step2_Label = new JLabel();
+        // JPanel stepsPanel = new JPanel();
 
         gcs.setStatusLabel(statusLabel);
         gcg.setPosLabel(posLabel);
@@ -150,18 +153,18 @@ public class DrawingApp {
         welcomeLabel.setFont(new Font("Didot", Font.PLAIN, 110));
         welcomeLabel.setForeground(Color.white);
         welcomeLabel.setText("Welcome!");
-        step1_Label.setFont(new Font("Didot", Font.BOLD, 70));
-        step1_Label.setForeground(Color.white);
-        step1_Label.setText("Please sign in here, then pull some paper through for the next person.");
-        step2_Label.setFont(new Font("Didot", Font.BOLD, 70));
-        step2_Label.setForeground(Color.white);
-        step2_Label.setText("Press \"Clear\" to clean the slate!");
+        // step1_Label.setFont(new Font("Didot", Font.BOLD, 70));
+        // step1_Label.setForeground(Color.white);
+        // step1_Label.setText("Please sign in here, then pull some paper through for the next person.");
+        // step2_Label.setFont(new Font("Didot", Font.BOLD, 70));
+        // step2_Label.setForeground(Color.white);
+        // step2_Label.setText("Press \"Clear\" to clean the slate!");
 
-        stepsPanel.setLayout(new BoxLayout(stepsPanel, BoxLayout.PAGE_AXIS));
-        stepsPanel.setBackground(Color.BLACK);
-        stepsPanel.add(step1_Label);
-        stepsPanel.add(step2_Label);
-        stepsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        // stepsPanel.setLayout(new BoxLayout(stepsPanel, BoxLayout.PAGE_AXIS));
+        // stepsPanel.setBackground(Color.BLACK);
+        // stepsPanel.add(step1_Label);
+        // stepsPanel.add(step2_Label);
+        // stepsPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
         displayWidth = (int) displaySize.getWidth();
         displayHeight = (int) displaySize.getHeight();
@@ -191,6 +194,16 @@ public class DrawingApp {
         topPanel.add(welcomeLabel);
         topPanel.add(new Box.Filler(minTopSize, prefTopSize, maxTopSize));
 
+        // Set up the Buttons panel
+        buttonsPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
+        Dimension minButtonsSize = new Dimension(0, 0);
+        Dimension prefButtonsSize = new Dimension(displayWidth, topHeight);
+        Dimension maxButtonsSize = new Dimension(displayWidth, topHeight);
+        buttonsPanel.setBackground(Color.BLACK);
+        buttonsPanel.setMaximumSize(maxTopSize);
+        buttonsPanel.add(welcomeLabel);
+        buttonsPanel.add(new Box.Filler(minButtonsSize, prefButtonsSize, maxButtonsSize));
+        
         // Set up bottom panel
         Dimension minBottomSize = new Dimension(0, 0);
         Dimension prefBottomSize = new Dimension(displayWidth, bottomHeight);
@@ -246,12 +259,19 @@ public class DrawingApp {
         }
         statusLabel.setFont(new Font(statusLabel.getFont().getName(), Font.PLAIN, 25));
         statusLabel.setText("Status Text");
-        stepsPanel.add(statusLabel);
-        // bottomPanel.add(statusLabel, BorderLayout.LINE_START);
-        bottomPanel.add(stepsPanel, BorderLayout.LINE_START);
-        clearButton.setBackground(Color.white);
-        clearButton.setFont(new Font("Arial", Font.PLAIN, 30));
-        bottomPanel.add(clearButton, BorderLayout.LINE_END);
+        // stepsPanel.add(statusLabel);
+        bottomPanel.add(statusLabel, BorderLayout.LINE_START);
+        // bottomPanel.add(stepsPanel, BorderLayout.LINE_START);
+        buttonsPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
+
+        // buttonsPanel.add
+        clearButton.setBackground(Color.BLACK);
+        clearButton.setForeground(Color.WHITE);
+        clearButton.setFont(new Font("Didot", Font.PLAIN, 50));
+        buttonsPanel.add(exitButton);
+        buttonsPanel.add(clearButton);
+        
+        bottomPanel.add(buttonsPanel, BorderLayout.LINE_END);
         frame.setUndecorated(true);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setState(JFrame.MAXIMIZED_BOTH);

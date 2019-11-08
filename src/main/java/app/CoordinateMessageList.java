@@ -10,6 +10,7 @@ public class CoordinateMessageList {
 
     private LinkedList<CoordinateMessage> coordsList = new LinkedList<CoordinateMessage>();
     private boolean bPenStateChanged;
+    private int cnt = 0;;
 
     public void addCoordinatesToList(PenStates penState, int X, int Y) {
         PenStates prevPenState;
@@ -25,6 +26,14 @@ public class CoordinateMessageList {
             msg.setPreviousCoordinates(prevMsg);
         coordsList.addLast(msg);
 
+    }
+
+    public void addCoordinatesToList(CoordinateMessage msg) {
+        cnt++;
+        if (cnt % 2 == 0)
+            coordsList.addLast(msg);
+        if (cnt == 1000)
+            cnt = 0;
     }
 
     public int getSize() {
@@ -56,7 +65,4 @@ public class CoordinateMessageList {
         return this.bPenStateChanged;
     }
 
-    public void addCoordinatesToList(CoordinateMessage msg) {
-        coordsList.addLast(msg);
-    }
 }

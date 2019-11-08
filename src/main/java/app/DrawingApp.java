@@ -71,6 +71,12 @@ public class DrawingApp {
                     e1.printStackTrace();
                 }
                 drawArea.clear();
+                try {
+                    gcs.autoHome();
+                } catch (NullPointerException | IOException | InterruptedException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
             } else if (e.getSource() == homeButton) {
                 // btnConnectActionPerformed(e);
                 try {
@@ -160,7 +166,7 @@ public class DrawingApp {
         int displayWidth, displayHeight, drawWidth, drawHeight, topHeight, bottomHeight;
         Container content;
 
-
+        frame.setResizable(false);
         JLabel statusLabel = new JLabel();
         JLabel posLabel = new JLabel();
         JLabel welcomeLabel = new JLabel();
